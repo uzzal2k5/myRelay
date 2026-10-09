@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/redis.css">
+
+<div class="redis-header">
+    <h2>Redis Policies</h2>
+    <p class="redis-subtitle">Configure per-user SMTP rate limits stored in Redis.</p>
+</div>
+
+<div class="redis-panel">
+    <div class="redis-panel-header">
+        <i class="bi bi-sliders"></i>
+        Set Rate Limit Policy
+    </div>
+
+    <div class="redis-panel-body">
+        <form method="post" action="/redis/policy">
+
+            <div class="redis-field">
+                <label for="username">AD / Application Username</label>
+                <div class="redis-input-wrapper">
+                    <i class="bi bi-person-fill"></i>
+                    <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            placeholder="svc_application@muktopay.com"
+                            required>
+                </div>
+            </div>
+
+            <div class="redis-limits-heading">Message Limits</div>
+
+            <div class="redis-limits-grid">
+                {% for field, value, icon in [
+                ('minute', 10, 'bi-stopwatch'),
+                ('hour', 100, 'bi-clock'),
+                ('day', 500, 'bi-calendar-day'),
+                ('week', 3500, 'bi-calendar-week'),
+                ('month', 15000, 'bi-calendar-month'),
+                ('year', 100000, 'bi-calendar-range'),
+                ] %}
+                <div class="redis-limit-box">
+                    <label for="{{ field }}"><i class="bi {{ icon }}"></i>{{ field }}</label>
+                    <input
+                            id="{{ field }}"
+                            type="number"
+                            min="0"
+                            name="{{ field }}"
+                            value="{{ value }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="redis-submit">
+                <i class="bi bi-save"></i>
+                Save Redis Policy
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<div class="redis-panel">
+    <div class="redis-panel-header">
+        <i class="bi bi-key-fill"></i>
+        Application Policy Keys
+        <span class="redis-keys-count">{{ keys|length }}</span>
+    </div>
+
+    {% if keys %}
+    <div class="redis-keys-list">
+        {% for key in keys %}
+        <div class="redis-key-row">
+            <i class="bi bi-tag"></i>
+            <code>{{ key }}</code>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="redis-keys-empty">No policy keys found.</div>
+    {% endif %}
+</div>
+{% endblock %}

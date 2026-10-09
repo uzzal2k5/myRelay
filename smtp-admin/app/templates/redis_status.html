@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/redis-status.css">
+
+<div class="rs-header">
+    <div>
+        <h2>Redis Status</h2>
+        <p class="rs-subtitle">Live server health, memory, replication, and keyspace overview.</p>
+    </div>
+
+    <span class="rs-status-pill {{ 'is-ok' if redis_ok else 'is-bad' }}">
+        {{ "Connected" if redis_ok else "Unavailable" }}
+    </span>
+</div>
+
+{% if error %}
+<div class="rs-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if status %}
+<div class="rs-grid">
+
+    <div class="rs-panel">
+        <div class="rs-panel-header"><i class="bi bi-hdd-stack"></i>Server</div>
+        <div class="rs-panel-body">
+            <div class="rs-stat-row"><span class="rs-stat-label">Version</span><span class="rs-stat-value">{{ status.server.redis_version or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Mode</span><span class="rs-stat-value">{{ status.server.redis_mode or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">OS</span><span class="rs-stat-value">{{ status.server.os or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Process ID</span><span class="rs-stat-value">{{ status.server.process_id or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Uptime</span><span class="rs-stat-value">{{ status.server.uptime_in_days if status.server.uptime_in_days is not none else "—" }} days</span></div>
+        </div>
+    </div>
+
+    <div class="rs-panel">
+        <div class="rs-panel-header"><i class="bi bi-memory"></i>Memory</div>
+        <div class="rs-panel-body">
+            <div class="rs-stat-row"><span class="rs-stat-label">Used Memory</span><span class="rs-stat-value">{{ status.memory.used_memory_human or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Peak Memory</span><span class="rs-stat-value">{{ status.memory.used_memory_peak_human or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Max Memory</span><span class="rs-stat-value">{{ status.memory.maxmemory_human }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Eviction Policy</span><span class="rs-stat-value">{{ status.memory.maxmemory_policy or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Fragmentation Ratio</span><span class="rs-stat-value">{{ status.memory.mem_fragmentation_ratio or "—" }}</span></div>
+        </div>
+    </div>
+
+    <div class="rs-panel">
+        <div class="rs-panel-header"><i class="bi bi-people"></i>Clients</div>
+        <div class="rs-panel-body">
+            <div class="rs-stat-row"><span class="rs-stat-label">Connected Clients</span><span class="rs-stat-value">{{ status.clients.connected_clients if status.clients.connected_clients is not none else "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Blocked Clients</span><span class="rs-stat-value">{{ status.clients.blocked_clients if status.clients.blocked_clients is not none else "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Tracking Clients</span><span class="rs-stat-value">{{ status.clients.tracking_clients if status.clients.tracking_clients is not none else "—" }}</span></div>
+        </div>
+    </div>
+
+    <div class="rs-panel">
+        <div class="rs-panel-header"><i class="bi bi-graph-up-arrow"></i>Throughput & Stats</div>
+        <div class="rs-panel-body">
+            <div class="rs-stat-row"><span class="rs-stat-label">Ops / sec</span><span class="rs-stat-value">{{ status.stats.instantaneous_ops_per_sec if status.stats.instantaneous_ops_per_sec is not none else "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Total Commands</span><span class="rs-stat-value">{{ status.stats.total_commands_processed if status.stats.total_commands_processed is not none else "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Total Connections</span><span class="rs-stat-value">{{ status.stats.total_connections_received if status.stats.total_connections_received is not none else "—" }}</span></div>
+            <div class="rs-stat-row">
+                <span class="rs-stat-label">Hit Rate</span>
+                <span class="rs-stat-value {{ 'rs-hit-rate-good' if status.stats.hit_rate_percent and status.stats.hit_rate_percent >= 90 else 'rs-hit-rate-bad' if status.stats.hit_rate_percent is not none else '' }}">
+                    {{ (status.stats.hit_rate_percent ~ "%") if status.stats.hit_rate_percent is not none else "—" }}
+                </span>
+            </div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Expired Keys</span><span class="rs-stat-value">{{ status.stats.expired_keys if status.stats.expired_keys is not none else "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Evicted Keys</span><span class="rs-stat-value">{{ status.stats.evicted_keys if status.stats.evicted_keys is not none else "—" }}</span></div>
+        </div>
+    </div>
+
+    <div class="rs-panel">
+        <div class="rs-panel-header"><i class="bi bi-diagram-2"></i>Replication</div>
+        <div class="rs-panel-body">
+            <div class="rs-stat-row"><span class="rs-stat-label">Role</span><span class="rs-stat-value">{{ status.replication.role or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Connected Replicas</span><span class="rs-stat-value">{{ status.replication.connected_slaves }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Repl. Offset</span><span class="rs-stat-value">{{ status.replication.master_repl_offset if status.replication.master_repl_offset is not none else "—" }}</span></div>
+        </div>
+    </div>
+
+    <div class="rs-panel">
+        <div class="rs-panel-header"><i class="bi bi-save2"></i>Persistence</div>
+        <div class="rs-panel-body">
+            <div class="rs-stat-row"><span class="rs-stat-label">Last RDB Save</span><span class="rs-stat-value">{{ status.persistence.rdb_last_bgsave_status or "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">Changes Since Save</span><span class="rs-stat-value">{{ status.persistence.rdb_changes_since_last_save if status.persistence.rdb_changes_since_last_save is not none else "—" }}</span></div>
+            <div class="rs-stat-row"><span class="rs-stat-label">AOF Enabled</span><span class="rs-stat-value">{{ "Yes" if status.persistence.aof_enabled else "No" }}</span></div>
+            {% if status.persistence.aof_enabled %}
+            <div class="rs-stat-row"><span class="rs-stat-label">Last AOF Rewrite</span><span class="rs-stat-value">{{ status.persistence.aof_last_bgrewrite_status or "—" }}</span></div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<div class="rs-panel">
+    <div class="rs-panel-header"><i class="bi bi-database"></i>Keyspace</div>
+
+    {% if status.keyspace %}
+    <table class="rs-keyspace-table">
+        <thead>
+        <tr>
+            <th scope="col">Database</th>
+            <th scope="col">Keys</th>
+            <th scope="col">With Expiry</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for db in status.keyspace %}
+        <tr>
+            <td>db{{ db.db }}</td>
+            <td>{{ db.keys }}</td>
+            <td>{{ db.expires }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="rs-keyspace-empty">No keys in any database.</div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/installation.css">
+
+<div class="in-header">
+    <h2>Installation &amp; Setup</h2>
+    <p class="in-subtitle">A read-only readiness check for this portal's dependencies. Nothing here installs or changes anything.</p>
+</div>
+
+<div class="in-summary-grid">
+    <div class="in-summary-tile">
+        <div class="in-summary-icon is-ok"><i class="bi bi-check-circle-fill"></i></div>
+        <div><div class="in-summary-label">Passing</div><div class="in-summary-value">{{ report.ok_count }}</div></div>
+    </div>
+    <div class="in-summary-tile">
+        <div class="in-summary-icon is-warn"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div><div class="in-summary-label">Warnings</div><div class="in-summary-value">{{ report.warn_count }}</div></div>
+    </div>
+    <div class="in-summary-tile">
+        <div class="in-summary-icon is-fail"><i class="bi bi-x-circle-fill"></i></div>
+        <div><div class="in-summary-label">Failing</div><div class="in-summary-value">{{ report.fail_count }}</div></div>
+    </div>
+</div>
+
+{% for category, items in report.categories.items() %}
+<div class="in-category">
+    <div class="in-category-header">{{ category }}</div>
+
+    {% for item in items %}
+    <div class="in-item">
+        <div class="in-item-top">
+            <i class="bi in-item-icon is-{{ item.status }} {{ 'bi-check-circle-fill' if item.status == 'ok' else 'bi-exclamation-triangle-fill' if item.status == 'warn' else 'bi-x-circle-fill' }}"></i>
+            <span class="in-item-name">{{ item.name }}</span>
+        </div>
+        <div class="in-item-detail">{{ item.detail }}</div>
+        {% if item.fix %}
+        <div class="in-item-fix">{{ item.fix }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

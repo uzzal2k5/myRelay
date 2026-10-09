@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/recipient-domains.css">
+
+<div class="recipient-container">
+
+    <h1 class="page-title">
+        Whitelisting Management
+    </h1>
+
+    <div class="page-description">
+        Manage allowed domains, rejected domains and restricted recipients.
+        Postfix regular-expression syntax is managed automatically by the system.
+    </div>
+
+    {% if success %}
+    <div class="alert alert-success">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    {% include "partials/recipient_domains/allow_recipient.html" %}
+    {% include "partials/recipient_domains/rejected_domain.html" %}
+    {% include "partials/recipient_domains/restricted_address.html" %}
+
+</div>
+
+<script>
+
+    function togglePolicy(header) {
+        const section = header.closest(".policy-section");
+        section.classList.toggle("open");
+    }
+
+
+    function removeEntry(button) {
+        const row = button.closest(".entry-row");
+
+        if (row) {
+            row.remove();
+        }
+    }
+
+
+    function addEntry(policy) {
+        const container = document.getElementById(policy + "-entries");
+
+        if (!container) {
+            return;
+        }
+
+        // Remove "No entries configured."
+        const emptyMessage = document.getElementById(policy + "-empty");
+
+        if (emptyMessage) {
+            emptyMessage.remove();
+        }
+
+        const row = document.createElement("div");
+        row.className = "entry-row";
+
+        const valuePlaceholder =
+            policy === "restricted" ? "user@muktopay.com" : "example.com";
+
+        const valueLabel =
+            policy === "restricted" ? "Recipient Email" : "Domain";
+
+        let actionHtml = "";
+        let messageHtml = "";
+
+        if (policy === "allowed") {
+            actionHtml = `
+            <div>
+                <div class="field-label">Action</div>
+                <input type="hidden" name="actions" value="OK">
+                <select disabled>
+                    <option selected>OK</option>
+                </select>
+            </div>
+        `;
+
+            messageHtml = `
+            <div>
+                <div class="field-label">Rejection Message</div>
+                <input type="hidden" name="messages" value="">
+                <input type="text" value="No rejection message" disabled>
+            </div>
+        `;
+        } else {
+            const defaultMessage =
+                policy === "restricted"
+                    ? "You are not allowed to send to this recipient"
+                    : "External public email domain is not allowed";
+
+            actionHtml = `
+            <div>
+                <div class="field-label">Action</div>
+                <input type="hidden" name="actions" value="REJECT">
+                <select disabled>
+                    <option selected>REJECT</option>
+                </select>
+            </div>
+        `;
+
+            messageHtml = `
+            <div>
+                <div class="field-label">Rejection Message</div>
+                <input
+                    type="text"
+                    name="messages"
+                    value="${defaultMessage}"
+                    placeholder="${defaultMessage}">
+            </div>
+        `;
+        }
+
+        row.innerHTML = `
+        <div>
+            <div class="field-label">${valueLabel}</div>
+            <input type="text" name="values" placeholder="${valuePlaceholder}" required>
+        </div>
+
+        ${actionHtml}
+        ${messageHtml}
+
+        <div>
+            <div class="field-label">&nbsp;</div>
+            <button type="button" class="remove-entry" onclick="removeEntry(this)" title="Remove">✕</button>
+        </div>
+    `;
+
+        container.appendChild(row);
+    }
+
+</script>
+{% endblock %}

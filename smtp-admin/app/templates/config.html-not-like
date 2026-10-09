@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/config.css">
+
+{% set config_lines = (config or "").splitlines() %}
+
+<div class="cfg-header">
+    <div>
+        <h2>Effective Configuration</h2>
+        <p class="cfg-subtitle">The fully resolved Postfix configuration currently in effect.</p>
+    </div>
+
+    {% if config_lines %}
+    <span class="cfg-line-count">
+        <i class="bi bi-list-ol"></i>
+        {{ config_lines|length }} lines
+    </span>
+    {% endif %}
+</div>
+
+{% if error %}
+<div class="cfg-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="cfg-panel">
+    {% if config_lines %}
+    <div class="cfg-toolbar">
+        <div class="cfg-search">
+            <i class="bi bi-search"></i>
+            <input
+                    type="text"
+                    id="cfgSearchInput"
+                    placeholder="Filter by key or value..."
+                    oninput="filterConfigOutput(this.value)">
+        </div>
+
+        <button type="button" class="cfg-copy-btn" onclick="copyConfigOutput()">
+            <i class="bi bi-clipboard"></i>
+            <span id="cfgCopyLabel">Copy All</span>
+        </button>
+    </div>
+
+    <div class="cfg-output" id="cfgOutput">
+        {% for line in config_lines %}
+        <div class="cfg-row" data-line="{{ line|lower }}">
+            <span class="cfg-row-num">{{ loop.index }}</span>
+            <span class="cfg-row-text">{% if "=" in line %}<span class="cfg-key">{{ line.split("=", 1)[0].rstrip() }}</span> ={{ line.split("=", 1)[1] }}{% else %}{{ line }}{% endif %}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cfg-empty" id="cfgNoResults" style="display: none;">No matching configuration lines.</div>
+    {% else %}
+    <div class="cfg-empty">No configuration output available.</div>
+    {% endif %}
+</div>
+
+<script>
+    function filterConfigOutput(query) {
+        const normalized = query.trim().toLowerCase();
+        const rows = document.querySelectorAll("#cfgOutput .cfg-row");
+        const noResults = document.getElementById("cfgNoResults");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const haystack = row.getAttribute("data-line") || "";
+            const match = haystack.includes(normalized);
+            row.classList.toggle("is-hidden", !match);
+            if (match) visibleCount++;
+        });
+
+        noResults.style.display = visibleCount === 0 ? "block" : "none";
+    }
+
+    function copyConfigOutput() {
+        const rows = document.querySelectorAll("#cfgOutput .cfg-row:not(.is-hidden) .cfg-row-text");
+        const text = Array.from(rows).map(el => el.textContent).join("\n");
+        const label = document.getElementById("cfgCopyLabel");
+        const button = label.closest(".cfg-copy-btn");
+
+        navigator.clipboard.writeText(text).then(() => {
+            const original = label.textContent;
+            label.textContent = "Copied!";
+            button.classList.add("is-copied");
+
+            setTimeout(() => {
+                label.textContent = original;
+                button.classList.remove("is-copied");
+            }, 1500);
+        }).catch(() => {
+            label.textContent = "Copy failed";
+        });
+    }
+</script>
+{% endblock %}

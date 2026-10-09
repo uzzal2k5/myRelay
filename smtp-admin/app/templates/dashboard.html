@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+
+{% set postfix_state = (postfix_status or "") | lower %}
+{% set redis_state = (redis_status or "") | lower %}
+{% set smtp_policy_state = (smtp_policy_status or "") | lower %}
+
+{% set postfix_class =
+"is-ok" if postfix_state in ["active", "running", "ok"]
+else "is-bad" if postfix_state in ["inactive", "stopped", "down", "error", "failed"]
+else "is-unknown" %}
+
+{% set redis_class =
+"is-ok" if redis_state in ["up", "active", "connected", "ok"]
+else "is-bad" if redis_state in ["down", "inactive", "disconnected", "error"]
+else "is-unknown" %}
+
+{% set smtp_policy_class =
+"is-ok" if smtp_policy_state in ["active", "running", "ok"]
+else "is-bad" if smtp_policy_state in ["inactive", "stopped", "down", "error", "failed"]
+else "is-unknown" %}
+
+{% set queue_text = (queue or "") | trim %}
+{% set queue_is_empty = queue_text == "" or "mail queue is empty" in queue_text|lower %}
+
+<div class="dashboard-header">
+    <h2>Dashboard</h2>
+    <p class="dashboard-subtitle">Live overview of relay and messaging health.</p>
+</div>
+
+<div class="status-grid">
+
+    <div class="status-tile">
+        <div class="status-tile-icon {{ postfix_class }}">
+            <i class="bi bi-envelope-paper-fill"></i>
+        </div>
+        <div class="status-tile-body">
+            <p class="status-tile-label">Postfix</p>
+            <span class="status-pill {{ postfix_class }}">
+                {{ postfix_status or "Unknown" }}
+            </span>
+        </div>
+    </div>
+
+    <div class="status-tile">
+        <div class="status-tile-icon {{ redis_class }}">
+            <i class="bi bi-database-fill"></i>
+        </div>
+        <div class="status-tile-body">
+            <p class="status-tile-label">Redis</p>
+            <span class="status-pill {{ redis_class }}">
+                {{ redis_status or "Unknown" }}
+            </span>
+        </div>
+    </div>
+
+    <div class="status-tile">
+        <div class="status-tile-icon {{ smtp_policy_class }}">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="status-tile-body">
+            <p class="status-tile-label">SMTP Policy Service</p>
+            <span class="status-pill {{ smtp_policy_class }}">
+                {{ smtp_policy_status or "Unknown" }}
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-panel">
+    <div class="dashboard-panel-header">
+        <i class="bi bi-list-ul"></i>
+        Postfix Queue
+    </div>
+    <div class="dashboard-panel-body">
+        {% if queue_is_empty %}
+        <div class="queue-output is-empty">Mail queue is empty</div>
+        {% else %}
+        <pre class="queue-output">{{ queue_text }}</pre>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

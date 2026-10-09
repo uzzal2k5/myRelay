@@ -1,0 +1,238 @@
+:root {
+    --mon-border: #e2e8f0;
+    --mon-muted: #64748b;
+    --mon-text: #172033;
+    --mon-bg-subtle: #f8fafc;
+    --mon-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --mon-ok: #15803d;
+    --mon-ok-bg: #ecfdf5;
+    --mon-ok-border: #a7f3d0;
+    --mon-bad: #dc2626;
+    --mon-bad-bg: #fef2f2;
+    --mon-bad-border: #fecaca;
+    --mon-warn: #b45309;
+    --mon-warn-bg: #fffbeb;
+    --mon-warn-border: #fde68a;
+}
+
+.mon-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.mon-header h2 {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--mon-text);
+    letter-spacing: -0.01em;
+}
+
+.mon-subtitle {
+    margin: 0;
+    color: var(--mon-muted);
+    font-size: 14px;
+}
+
+.mon-overall-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.mon-overall-pill.is-ok {
+    background: var(--mon-ok-bg);
+    border-color: var(--mon-ok-border);
+    color: var(--mon-ok);
+}
+
+.mon-overall-pill.is-bad {
+    background: var(--mon-bad-bg);
+    border-color: var(--mon-bad-border);
+    color: var(--mon-bad);
+}
+
+.mon-service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.mon-service-card {
+    display: block;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid var(--mon-border);
+    border-radius: 12px;
+    box-shadow: var(--mon-shadow);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.mon-service-card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+    color: inherit;
+}
+
+.mon-service-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.mon-service-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.mon-service-icon.is-ok {
+    background: var(--mon-ok-bg);
+    color: var(--mon-ok);
+}
+
+.mon-service-icon.is-bad {
+    background: var(--mon-bad-bg);
+    color: var(--mon-bad);
+}
+
+.mon-service-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mon-text);
+}
+
+.mon-service-state {
+    font-size: 12px;
+    color: var(--mon-muted);
+    text-transform: capitalize;
+}
+
+.mon-service-detail {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--mon-bad);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.mon-panel {
+    background: #fff;
+    border: 1px solid var(--mon-border);
+    border-radius: 12px;
+    box-shadow: var(--mon-shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.mon-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--mon-border);
+    background: var(--mon-bg-subtle);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--mon-text);
+}
+
+.mon-panel-header i {
+    color: var(--mon-muted);
+    font-size: 16px;
+}
+
+.mon-host-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+.mon-host-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--mon-muted);
+    margin-bottom: 4px;
+}
+
+.mon-host-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--mon-text);
+}
+
+.mon-disk-row {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--mon-border);
+}
+
+.mon-disk-row:last-child {
+    border-bottom: 0;
+}
+
+.mon-disk-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.mon-disk-label {
+    font-weight: 600;
+    color: var(--mon-text);
+}
+
+.mon-disk-path {
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 11px;
+    color: var(--mon-muted);
+}
+
+.mon-disk-figure {
+    font-weight: 700;
+}
+
+.mon-disk-bar-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: var(--mon-bg-subtle);
+    overflow: hidden;
+}
+
+.mon-disk-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+}
+
+.mon-disk-bar-fill.is-ok { background: var(--mon-ok); }
+.mon-disk-bar-fill.is-warn { background: var(--mon-warn); }
+.mon-disk-bar-fill.is-critical { background: var(--mon-bad); }
+
+.mon-disk-error {
+    font-size: 12px;
+    color: var(--mon-muted);
+    font-style: italic;
+}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Effective  Configuration</h2>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+<div class="card"><div class="card-body">
+<pre class="mb-0">{{ config }}</pre>
+</div></div>
+
+
+
+<h2>Certificate Management</h2>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form method="get" action="/cert">
+    <label for="certificate-file">Certificate file</label>
+
+    <select
+            id="certificate-file"
+            name="filename"
+            onchange="this.form.submit()"
+    >
+        {% for cert_file in config.certificate_files %}
+        <option
+                value="{{ cert_file }}"
+                {% if cert_file == config.selected_certificate %}selected{% endif %}
+        >
+            {{ cert_file }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <noscript>
+        <button type="submit">Load Certificate</button>
+    </noscript>
+</form>
+
+{% if config.selected_certificate %}
+<div class="certificate-section">
+    <h3>Certificate PEM Content</h3>
+
+    <textarea
+            id="certificate-content"
+            rows="18"
+            readonly
+            spellcheck="false"
+            style="width: 100%; font-family: monospace;"
+    >{{ config.certificate_content }}</textarea>
+</div>
+
+<div class="certificate-section">
+    <h3>Parsed Certificate Values</h3>
+
+    {% if config.certificate_details %}
+    <table class="table">
+        <tr>
+            <th>Certificate File</th>
+            <td>{{ config.certificate_details.filename }}</td>
+        </tr>
+        <tr>
+            <th>Subject</th>
+            <td>{{ config.certificate_details.subject }}</td>
+        </tr>
+        <tr>
+            <th>Issuer</th>
+            <td>{{ config.certificate_details.issuer }}</td>
+        </tr>
+        <tr>
+            <th>Serial Number</th>
+            <td>{{ config.certificate_details.serial_number }}</td>
+        </tr>
+        <tr>
+            <th>Version</th>
+            <td>{{ config.certificate_details.version }}</td>
+        </tr>
+        <tr>
+            <th>Valid From</th>
+            <td>{{ config.certificate_details.valid_from }}</td>
+        </tr>
+        <tr>
+            <th>Valid Until</th>
+            <td>{{ config.certificate_details.valid_until }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{ config.certificate_details.status }}</td>
+        </tr>
+        <tr>
+            <th>Subject Alternative Names</th>
+            <td>
+                {% for san in config.certificate_details.subject_alt_names %}
+                {{ san }}<br>
+                {% else %}
+                Not available
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+    {% else %}
+    <p>Certificate details are not available.</p>
+    {% endif %}
+</div>
+{% else %}
+
+<p>No .crt certificate files were found in /etc/postfix/tls/.</p>
+{% endif %}
+{% endblock %}

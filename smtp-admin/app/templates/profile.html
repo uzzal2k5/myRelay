@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/profile.css">
+
+{% set role_labels = {"security_admin": "Security Admin", "smtp_admin": "SMTP Admin", "read_only": "Read Only"} %}
+
+<div class="profile-container">
+
+    <div class="profile-hero">
+        <div class="profile-avatar"><i class="bi bi-person-fill"></i></div>
+        <div>
+            <p class="profile-hero-name">
+                {{ (directory_info.display_name if directory_info and directory_info.found else None) or session_username }}
+            </p>
+            <p class="profile-hero-username">{{ session_username }}</p>
+            <span class="profile-role-badge is-{{ session_role }}">
+                <i class="bi bi-shield-check"></i>
+                {{ role_labels.get(session_role, session_role) }}
+            </span>
+        </div>
+    </div>
+
+    {% if directory_error %}
+    <div class="profile-panel">
+        <div class="profile-alert">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Directory details could not be loaded: {{ directory_error }}</span>
+        </div>
+    </div>
+    {% elif directory_info and not directory_info.found %}
+    <div class="profile-panel">
+        <div class="profile-alert">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Your account could not be matched in the directory. Showing session information only.</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="profile-panel">
+        <div class="profile-panel-header">
+            <i class="bi bi-person-badge"></i>
+            Account
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-field">
+                <div class="profile-field-label">Display name</div>
+                <div class="profile-field-value {{ '' if (directory_info and directory_info.display_name) else 'is-unset' }}">
+                    {{ (directory_info.display_name if directory_info else None) or "Not available" }}
+                </div>
+            </div>
+
+            <div class="profile-field">
+                <div class="profile-field-label">Email</div>
+                <div class="profile-field-value {{ '' if (directory_info and directory_info.mail) else 'is-unset' }}">
+                    {{ (directory_info.mail if directory_info else None) or "Not available" }}
+                </div>
+            </div>
+
+            <div class="profile-field">
+                <div class="profile-field-label">Username</div>
+                <div class="profile-field-value">{{ session_username }}</div>
+            </div>
+
+            <div class="profile-field">
+                <div class="profile-field-label">Account status</div>
+                <div class="profile-field-value">
+                    {% if directory_info and directory_info.enabled is not none %}
+                    <span class="profile-status-pill {{ 'is-ok' if directory_info.enabled else 'is-bad' }}">
+                        <i class="bi {{ 'bi-check-circle-fill' if directory_info.enabled else 'bi-x-circle-fill' }}"></i>
+                        {{ "Enabled" if directory_info.enabled else "Disabled" }}
+                    </span>
+                    {% else %}
+                    <span class="is-unset">Unknown</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profile-field" style="grid-column: 1 / -1;">
+                <div class="profile-field-label">Portal role</div>
+                <div class="profile-field-value">{{ role_labels.get(session_role, session_role) }}</div>
+            </div>
+
+            {% if directory_info and directory_info.dn %}
+            <div class="profile-field" style="grid-column: 1 / -1;">
+                <div class="profile-field-label">Distinguished name</div>
+                <div class="profile-field-value">{{ directory_info.dn }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if directory_info and directory_info.groups %}
+    <div class="profile-panel">
+        <div class="profile-panel-header">
+            <i class="bi bi-people-fill"></i>
+            Group memberships ({{ directory_info.groups | length }}{{ "+" if directory_info.groups_truncated }})
+        </div>
+
+        <div class="profile-groups">
+            {% for group in directory_info.groups %}
+            <span class="profile-group-chip">{{ group }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,2 @@
+smtp-admin ALL=(root) NOPASSWD: /usr/local/sbin/smtp-admin-postfix-helper
+smtp-admin ALL=(root) NOPASSWD: /usr/local/sbin/my-relay-policy-ctl

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/about.css">
+
+<div class="about-container">
+
+    <div class="about-hero">
+        <svg class="about-hero-mark" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="aboutCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00D9FF"/>
+                    <stop offset="100%" stop-color="#1D9BD8"/>
+                </linearGradient>
+            </defs>
+            <polygon points="50,0 190,0 240,50 240,190 190,240 50,240 0,190 0,50" fill="#0A1930"/>
+            <rect x="40" y="88" width="110" height="64" rx="8" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+            <path d="M40,94 L95,128 L150,94" fill="none" stroke="url(#aboutCyanGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M172,86 L208,120 L172,154" fill="none" stroke="#00D9FF" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0.22"/>
+            <path d="M172,86 L208,120 L172,154" fill="none" stroke="url(#aboutCyanGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="208" cy="120" r="5" fill="#00D9FF"/>
+            <path d="M196,98 L222,120 L196,142" fill="none" stroke="#1D9BD8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        </svg>
+
+        <div class="about-hero-text">
+            <p class="about-hero-title">My Relay — SMTP Portal</p>
+            <p class="about-hero-subtitle">Developed and maintained by PipaOps</p>
+        </div>
+    </div>
+
+    <div class="about-panel">
+        <div class="about-panel-header">
+            <i class="bi bi-info-circle-fill"></i>
+            <h3>About PipaOps</h3>
+        </div>
+        <div class="about-panel-body">
+            <p>
+                PipaOps is the development team responsible for building and
+                maintaining the My Relay SMTP administration portal, including
+                its Postfix relay management, security policies, and
+                infrastructure automation.
+            </p>
+        </div>
+    </div>
+
+    <div class="about-panel">
+        <div class="about-panel-header">
+            <i class="bi bi-stack"></i>
+            <h3>Built With</h3>
+        </div>
+        <div class="about-panel-body">
+            <div class="about-stack-grid">
+                <div class="about-stack-chip"><i class="bi bi-lightning-charge-fill"></i><span>FastAPI</span></div>
+                <div class="about-stack-chip"><i class="bi bi-envelope-paper-fill"></i><span>Postfix</span></div>
+                <div class="about-stack-chip"><i class="bi bi-database-fill"></i><span>Redis</span></div>
+                <div class="about-stack-chip"><i class="bi bi-shield-lock-fill"></i><span>Active Directory</span></div>
+                <div class="about-stack-chip"><i class="bi bi-braces"></i><span>Jinja2</span></div>
+                <div class="about-stack-chip"><i class="bi bi-hdd-rack-fill"></i><span>Oracle Linux 9</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-panel">
+        <div class="about-panel-header">
+            <i class="bi bi-chat-dots-fill"></i>
+            <h3>Contact</h3>
+        </div>
+        <div class="about-panel-body">
+            <div class="about-contact-grid">
+
+                <a class="about-contact-card" href="{{ whatsapp_link }}" target="_blank" rel="noopener">
+                    <div class="about-contact-icon is-whatsapp">
+                        <i class="bi bi-whatsapp"></i>
+                    </div>
+                    <div class="about-contact-info">
+                        <div class="about-contact-label">WhatsApp</div>
+                        <div class="about-contact-value">{{ whatsapp_number }}</div>
+                    </div>
+                    <button
+                            type="button"
+                            class="about-copy-btn"
+                            onclick="copyAboutValue(event, '{{ whatsapp_number }}', this)"
+                            title="Copy number">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </a>
+
+                <a class="about-contact-card" href="mailto:{{ contact_email }}">
+                    <div class="about-contact-icon is-email">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                    <div class="about-contact-info">
+                        <div class="about-contact-label">Email</div>
+                        <div class="about-contact-value">{{ contact_email }}</div>
+                    </div>
+                    <button
+                            type="button"
+                            class="about-copy-btn"
+                            onclick="copyAboutValue(event, '{{ contact_email }}', this)"
+                            title="Copy email">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <p class="about-footer-note">
+        My Relay SMTP Portal &copy; 2027 — Developed with <i class="bi bi-heart-fill"></i> by PipaOps
+    </p>
+
+</div>
+
+<script>
+    function copyAboutValue(event, value, button) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        navigator.clipboard.writeText(value).then(() => {
+            const icon = button.querySelector("i");
+            const originalClass = icon.className;
+
+            button.classList.add("is-copied");
+            icon.className = "bi bi-check2";
+
+            setTimeout(() => {
+                button.classList.remove("is-copied");
+                icon.className = originalClass;
+            }, 1500);
+        }).catch(() => {
+            // Clipboard API unavailable or blocked - the card link itself
+            // still works as a fallback (opens WhatsApp / mail client).
+        });
+    }
+</script>
+{% endblock %}

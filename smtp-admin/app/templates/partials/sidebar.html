@@ -1,0 +1,502 @@
+{# templates/partials/sidebar.html #}
+
+{% set current_user = current_user | default({}) %}
+{% set role = current_user.role | default("read_only") | lower | replace(" ", "_") %}
+{% set path = request.url.path %}
+
+{% set is_admin = role == "smtp_admin" %}
+{% set is_security = role == "security_admin" %}
+{% set is_readonly = role == "read_only" %}
+
+<aside class="relay-sidebar" id="relaySidebar">
+
+    <div class="sidebar-heading">
+        NAVIGATION
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Main navigation">
+
+        <!-- Dashboard -->
+        <a href="/dashboard"
+           class="sidebar-link {% if path == '/dashboard' %}active{% endif %}">
+
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <!-- 1. Server Management -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/server') or path.startswith('/installation') or path.startswith('/postfix/config') or path.startswith('/backups') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#serverManagementMenu"
+                    aria-expanded="{% if path.startswith('/server') or path.startswith('/installation') or path.startswith('/postfix/config') or path.startswith('/backups') %}true{% else %}false{% endif %}"
+                    aria-controls="serverManagementMenu">
+
+                <i class="bi bi-server"></i>
+                <span>Server Management</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/server') or path.startswith('/installation') or path.startswith('/postfix/config') or path.startswith('/backups') %}show{% endif %}"
+                 id="serverManagementMenu">
+
+                <div class="sidebar-submenu">
+
+                    <a href="/server/inventory"
+                       class="sidebar-sublink {% if path == '/server/inventory' %}active{% endif %}">
+                        Server Inventory
+                    </a>
+
+                    {% if is_admin %}
+                    <a href="/installation"
+                       class="sidebar-sublink {% if path.startswith('/installation') %}active{% endif %}">
+                        Installation & Setup
+                    </a>
+                    {% endif %}
+
+                    <a href="/postfix"
+                       class="sidebar-sublink {% if path.startswith('/postfix') %}active{% endif %}">
+                        Postfix Control
+                    </a>
+
+                    {% if is_admin %}
+                    <a href="/postfix/control"
+                       class="sidebar-sublink {% if path.startswith('/postfix/control') %}active{% endif %}">
+                        Service Management
+                    </a>
+                    {% endif %}
+
+                    <a href="/postfix/config"
+                       class="sidebar-sublink {% if path.startswith('/postfix/config') %}active{% endif %}">
+                        Configuration Validation
+                    </a>
+
+                    {% if is_admin %}
+                    <a href="/backups"
+                       class="sidebar-sublink {% if path.startswith('/backups') %}active{% endif %}">
+                        Backup & Restore
+                    </a>
+                    {% endif %}
+
+                    <a href="/server/information"
+                       class="sidebar-sublink {% if path == '/server/information' %}active{% endif %}">
+                        System Information
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Redis -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/redis') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#redisMenu"
+                    aria-expanded="{% if path.startswith('/redis') %}true{% else %}false{% endif %}"
+                    aria-controls="redisMenu">
+
+                <i class="bi bi-database-fill"></i>
+                <span>Redis</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/redis') %}show{% endif %}"
+                 id="redisMenu">
+
+                <div class="sidebar-submenu">
+
+                    <!-- TODO: confirm real route - placeholder pending redis_admin/routes.py -->
+                    <a href="/redis/status"
+                       class="sidebar-sublink {% if path.startswith('/redis/status') %}active{% endif %}">
+                        Status
+                    </a>
+
+                    <a href="/redis"
+                       class="sidebar-sublink {% if path == '/redis' %}active{% endif %}">
+                        Policy Configuration
+                    </a>
+
+                    {% if is_admin or is_security %}
+                    <!-- TODO: confirm real route - placeholder pending redis_admin/routes.py -->
+                    <a href="/redis/data"
+                       class="sidebar-sublink {% if path.startswith('/redis/data') %}active{% endif %}">
+                        Data Browser
+                    </a>
+
+                    <!-- TODO: confirm real route - placeholder pending redis_admin/routes.py -->
+                    <a href="/redis/config"
+                       class="sidebar-sublink {% if path.startswith('/redis/config') %}active{% endif %}">
+                        Redis Configuration
+                    </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Security & Access -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/security') or path.startswith('/access') or path.startswith('/users') or path.startswith('/certificates') or path.startswith('/ldap') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#securityMenu"
+                    aria-expanded="{% if path.startswith('/security') or path.startswith('/access') or path.startswith('/users') or path.startswith('/certificates') or path.startswith('/ldap') %}true{% else %}false{% endif %}"
+                    aria-controls="securityMenu">
+
+                <i class="bi bi-shield-lock"></i>
+                <span>Security & Access</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/security') or path.startswith('/access') or path.startswith('/users') or path.startswith('/certificates') or path.startswith('/ldap') %}show{% endif %}"
+                 id="securityMenu">
+
+                <div class="sidebar-submenu">
+
+                    <a href="/ldap"
+                       class="sidebar-sublink {% if path.startswith('/ldap') %}active{% endif %}">
+                        LDAP / AD Authentication
+                    </a>
+
+                    {% if is_admin or is_security %}
+                    <a href="/users"
+                       class="sidebar-sublink {% if path.startswith('/users') %}active{% endif %}">
+                        User & Role Management
+                    </a>
+
+                    <a href="/access-control"
+                       class="sidebar-sublink {% if path.startswith('/access-control') %}active{% endif %}">
+                        Access Control
+                    </a>
+                    {% endif %}
+
+
+                    <a href="/certificates"
+                       class="sidebar-sublink {% if path.startswith('/certificates') %}active{% endif %}">
+                        SSL/TLS Certificates
+                    </a>
+
+                    <a href="/security/config"
+                       class="sidebar-sublink {% if path.startswith('/security/config') %}active{% endif %}">
+                        Security Configuration
+                    </a>
+
+                    <a href="/security/events"
+                       class="sidebar-sublink {% if path.startswith('/security/events') %}active{% endif %}">
+                        Security Events
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SMTP Policies -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/postfix/policies') or path.startswith('/ip/mgmt') or path.startswith('/postfix/recipient/domains') or path.startswith('/smtp/policies') or path.startswith('/smtp/policy') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#smtpPoliciesMenu"
+                    aria-expanded="{% if path.startswith('/postfix/policies') or path.startswith('/ip/mgmt') or path.startswith('/postfix/recipient/domains') or path.startswith('/smtp/policies') or path.startswith('/smtp/policy') %}true{% else %}false{% endif %}"
+                    aria-controls="smtpPoliciesMenu">
+
+                <i class="bi bi-shield-check"></i>
+                <span>SMTP Policies</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/postfix/policies') or path.startswith('/ip/mgmt') or path.startswith('/postfix/recipient/domains') or path.startswith('/smtp/policies') or path.startswith('/smtp/policy') %}show{% endif %}"
+                 id="smtpPoliciesMenu">
+
+                <div class="sidebar-submenu">
+
+                    <a href="/ip/mgmt"
+                       class="sidebar-sublink {% if path.startswith('/ip/mgmt') %}active{% endif %}">
+                        IP Management
+                    </a>
+                    <a href="/postfix/policies"
+                       class="sidebar-sublink {% if path.startswith('/postfix/policies') %}active{% endif %}">
+                        Postfix Maps
+                    </a>
+
+                    <a href="/postfix/submission/config"
+                       class="sidebar-sublink {% if path.startswith('/postfix/submission/config') %}active{% endif %}">
+                        SMTP Submission Policies
+                    </a>
+
+                    <a href="/recipient/domains"
+                       class="sidebar-sublink {% if path.startswith('/recipient/domains') %}active{% endif %}">
+                        Domain Whitelisting
+                    </a>
+
+                    <a href="/relay/endpoint"
+                       class="sidebar-sublink {% if path.startswith('/relayhost') %}active{% endif %}">
+                        Relay Access Policies
+                    </a>
+
+                    <a href="/policies/limits"
+                       class="sidebar-sublink {% if path.startswith('/policies/limits') %}active{% endif %}">
+                        Connection & Message Limits
+                    </a>
+
+                    <a href="/smtp/policy"
+                       class="sidebar-sublink {% if path.startswith('/smtp/policy') %}active{% endif %}">
+                        SMTP Policy
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Operations -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/postfix/control') or path.startswith('/mail/queue') or path.startswith('/smtp/connections') or path.startswith('/relay/endpoint') or path.startswith('/delivery') or path.startswith('/message/tracking') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#operationsMenu"
+                    aria-expanded="{% if path.startswith('/postfix/control') or path.startswith('/mail/queue') or path.startswith('/smtp/connections') or path.startswith('/relay/endpoint') or path.startswith('/delivery') or path.startswith('/message/tracking') %}true{% else %}false{% endif %}"
+                    aria-controls="operationsMenu">
+
+                <i class="bi bi-gear-wide-connected"></i>
+                <span>Operations</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/postfix/control') or path.startswith('/mail/queue') or path.startswith('/smtp/connections') or path.startswith('/relay/endpoint') or path.startswith('/delivery') or path.startswith('/message/tracking') %}show{% endif %}"
+                 id="operationsMenu">
+
+                <div class="sidebar-submenu">
+
+                    <a href="/postfix/control"
+                       class="sidebar-sublink {% if path.startswith('/postfix/control') %}active{% endif %}">
+                        Postfix Control
+                    </a>
+
+                    <a href="/mail/queue"
+                       class="sidebar-sublink {% if path.startswith('/mail/queue') %}active{% endif %}">
+                        Mail Queue Management
+                    </a>
+
+                    <a href="/smtp/connections"
+                       class="sidebar-sublink {% if path.startswith('/smtp/connections') %}active{% endif %}">
+                        SMTP Connection Monitor
+                    </a>
+
+                    <a href="/relay/endpoint"
+                       class="sidebar-sublink {% if path.startswith('/relay/endpoint') %}active{% endif %}">
+                        Relay Endpoint
+                    </a>
+
+                    <a href="/delivery"
+                       class="sidebar-sublink {% if path.startswith('/delivery') %}active{% endif %}">
+                        Delivery Status
+                    </a>
+
+                    <a href="/message/tracking"
+                       class="sidebar-sublink {% if path.startswith('/message/tracking') %}active{% endif %}">
+                        Message Tracking
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Monitoring & Reports -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/monitoring') or path.startswith('/reports') or path.startswith('/quota') or path.startswith('/alerts') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#monitoringMenu"
+                    aria-expanded="{% if path.startswith('/monitoring') or path.startswith('/reports') or path.startswith('/quota') or path.startswith('/alerts') %}true{% else %}false{% endif %}"
+                    aria-controls="monitoringMenu">
+
+                <i class="bi bi-graph-up"></i>
+                <span>Monitoring & Reports</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/monitoring') or path.startswith('/reports') or path.startswith('/quota') or path.startswith('/alerts') %}show{% endif %}"
+                 id="monitoringMenu">
+
+                <div class="sidebar-submenu">
+
+                    <a href="/monitoring"
+                       class="sidebar-sublink {% if path == '/monitoring' %}active{% endif %}">
+                        Service Health
+                    </a>
+
+                    <a href="/reports/traffic"
+                       class="sidebar-sublink {% if path.startswith('/reports/traffic') %}active{% endif %}">
+                        SMTP Traffic Statistics
+                    </a>
+
+                    <a href="/reports/delivery"
+                       class="sidebar-sublink {% if path.startswith('/reports/delivery') %}active{% endif %}">
+                        Delivery & Failure Reports
+                    </a>
+
+                    <a href="/quota"
+                       class="sidebar-sublink {% if path.startswith('/quota') %}active{% endif %}">
+                        Quota Usage
+                    </a>
+
+                    <a href="/monitoring/resources"
+                       class="sidebar-sublink {% if path.startswith('/monitoring/resources') %}active{% endif %}">
+                        System Resources
+                    </a>
+
+                    <a href="/alerts"
+                       class="sidebar-sublink {% if path.startswith('/alerts') %}active{% endif %}">
+                        Alert History
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Audit & Compliance -->
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/audit') or path.startswith('/compliance') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#auditMenu"
+                    aria-expanded="{% if path.startswith('/audit') or path.startswith('/compliance') %}true{% else %}false{% endif %}"
+                    aria-controls="auditMenu">
+
+                <i class="bi bi-clipboard2-check"></i>
+                <span>Audit & Compliance</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/audit') or path.startswith('/compliance') %}show{% endif %}"
+                 id="auditMenu">
+
+                <div class="sidebar-submenu">
+
+                    <a href="/audit"
+                       class="sidebar-sublink {% if path == '/audit' %}active{% endif %}">
+                        Audit Logs
+                    </a>
+
+                    <a href="/audit/configuration"
+                       class="sidebar-sublink {% if path.startswith('/audit/configuration') %}active{% endif %}">
+                        Configuration Changes
+                    </a>
+
+                    <a href="/audit/privileged"
+                       class="sidebar-sublink {% if path.startswith('/audit/privileged') %}active{% endif %}">
+                        Privileged Activity
+                    </a>
+
+                    <a href="/audit/authentication"
+                       class="sidebar-sublink {% if path.startswith('/audit/authentication') %}active{% endif %}">
+                        Authentication Logs
+                    </a>
+
+                    <a href="/audit/policies"
+                       class="sidebar-sublink {% if path.startswith('/audit/policies') %}active{% endif %}">
+                        Policy Change Reports
+                    </a>
+
+                    <a href="/audit/export"
+                       class="sidebar-sublink {% if path.startswith('/audit/export') %}active{% endif %}">
+                        Audit Export
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Administration -->
+        {% if is_admin or is_security %}
+        <div class="sidebar-section">
+
+            <button class="sidebar-group-toggle
+                           {% if path.startswith('/admin') or path.startswith('/portal/settings') %}active{% endif %}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#administrationMenu"
+                    aria-expanded="{% if path.startswith('/admin') or path.startswith('/portal/settings') %}true{% else %}false{% endif %}"
+                    aria-controls="administrationMenu">
+
+                <i class="bi bi-sliders"></i>
+                <span>Administration</span>
+                <i class="bi bi-chevron-down sidebar-chevron"></i>
+            </button>
+
+            <div class="collapse {% if path.startswith('/admin') or path.startswith('/portal/settings') %}show{% endif %}"
+                 id="administrationMenu">
+
+                <div class="sidebar-submenu">
+
+                    {% if is_admin %}
+                    <a href="/portal/settings"
+                       class="sidebar-sublink {% if path.startswith('/portal/settings') %}active{% endif %}">
+                        Portal Settings
+                    </a>
+                    {% endif %}
+
+                    {% if is_admin or is_security %}
+                    <a href="/admin/roles"
+                       class="sidebar-sublink {% if path.startswith('/admin/roles') %}active{% endif %}">
+                        Role & Permission Mapping
+                    </a>
+
+                    <a href="/admin/ldap"
+                       class="sidebar-sublink {% if path.startswith('/admin/ldap') %}active{% endif %}">
+                        LDAP / AD Settings
+                    </a>
+                    {% endif %}
+
+                    {% if is_admin %}
+                    <a href="/admin/application/logs"
+                       class="sidebar-sublink {% if path.startswith('/admin/application/logs') %}active{% endif %}">
+                        Application Logs
+                    </a>
+
+                    <a href="/admin/backup"
+                       class="sidebar-sublink {% if path.startswith('/admin/backup') %}active{% endif %}">
+                        Backup & Recovery
+                    </a>
+                    {% endif %}
+
+                    <a href="/admin/system"
+                       class="sidebar-sublink {% if path.startswith('/admin/system') %}active{% endif %}">
+                        System Information
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="sidebar-footer-title">
+            <i class="bi bi-shield-check me-1"></i>
+            Secure SMTP Relay
+        </div>
+
+        <small>
+            My Relay Portal
+        </small>
+    </div>
+
+</aside>

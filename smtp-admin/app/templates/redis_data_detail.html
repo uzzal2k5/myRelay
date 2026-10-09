@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/redis-data.css">
+
+<a class="rdb-back" href="/redis/data?pattern={{ pattern|urlencode }}&cursor={{ cursor }}">
+    <i class="bi bi-arrow-left"></i>
+    Back to Data Browser
+</a>
+
+{% if error %}
+<div class="rdb-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if detail %}
+<div class="rdb-detail-header">
+    <div>
+        <div class="rdb-detail-key">{{ detail.key }}</div>
+        <div class="rdb-detail-meta">
+            <span class="rdb-type-badge type-{{ detail.type }}">{{ detail.type }}</span>
+            <span class="rdb-ttl">
+                {% if detail.ttl is none or detail.ttl == -2 %}
+                TTL: —
+                {% elif detail.ttl == -1 %}
+                No expiry
+                {% else %}
+                TTL: {{ detail.ttl }}s
+                {% endif %}
+            </span>
+            {% if detail.total is defined %}
+            <span class="rdb-ttl">{{ detail.total }} item{{ "s" if detail.total != 1 else "" }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_editor %}
+    <form method="post" action="/redis/data/key/delete" onsubmit="return confirmKeyDelete('{{ detail.key }}');">
+        <input type="hidden" name="key" value="{{ detail.key }}">
+        <input type="hidden" name="pattern" value="{{ pattern }}">
+        <input type="hidden" name="cursor" value="{{ cursor }}">
+        <button type="submit" class="rdb-delete-btn">
+            <i class="bi bi-trash3"></i>
+            Delete Key
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="rdb-panel">
+    {% if detail.type == "string" %}
+    <pre class="rdb-value-string">{{ detail.value }}</pre>
+
+    {% elif detail.type == "hash" %}
+    <div class="rdb-table-wrapper">
+        <table class="rdb-table">
+            <thead><tr><th>Field</th><th>Value</th></tr></thead>
+            <tbody>
+            {% for field, value in detail.value %}
+            <tr><td>{{ field }}</td><td>{{ value }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% elif detail.type == "list" %}
+    <div class="rdb-table-wrapper">
+        <table class="rdb-table">
+            <thead><tr><th class="rdb-index-col">#</th><th>Value</th></tr></thead>
+            <tbody>
+            {% for item in detail.value %}
+            <tr><td class="rdb-index-col">{{ loop.index0 }}</td><td>{{ item }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% elif detail.type == "set" %}
+    <div class="rdb-table-wrapper">
+        <table class="rdb-table">
+            <thead><tr><th>Member</th></tr></thead>
+            <tbody>
+            {% for item in detail.value %}
+            <tr><td>{{ item }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% elif detail.type == "zset" %}
+    <div class="rdb-table-wrapper">
+        <table class="rdb-table">
+            <thead><tr><th>Member</th><th>Score</th></tr></thead>
+            <tbody>
+            {% for member, score in detail.value %}
+            <tr><td>{{ member }}</td><td>{{ score }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="rdb-empty">Unsupported key type for preview: {{ detail.type }}</div>
+    {% endif %}
+
+    {% if detail.truncated %}
+    <div class="rdb-truncated-note">
+        Showing the first {{ detail.value|length }} of {{ detail.total }} items. Full contents are not rendered to avoid loading extremely large collections into the browser.
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+    function confirmKeyDelete(key) {
+        return confirm(`Delete Redis key "${key}"? This cannot be undone.`);
+    }
+</script>
+{% endblock %}

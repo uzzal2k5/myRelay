@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/redis-config.css">
+
+<div class="rc-header">
+    <div>
+        <h2>Redis Configuration</h2>
+        <p class="rc-subtitle">Connection details, server info, and runtime configuration.</p>
+    </div>
+
+    <span class="rc-status-pill {{ 'is-ok' if redis_ok else 'is-bad' }}">
+        {{ "Connected" if redis_ok else "Unavailable" }}
+    </span>
+</div>
+
+{% if error %}
+<div class="rc-alert is-error">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="rc-alert is-success">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>{{ success }}</span>
+</div>
+{% endif %}
+
+<div class="rc-panel">
+    <div class="rc-panel-header">
+        <i class="bi bi-hdd-network"></i>
+        Connection & Server Info
+    </div>
+
+    <div class="rc-info-grid">
+        <div>
+            <div class="rc-info-item-label">Host</div>
+            <div class="rc-info-item-value">{{ connection_info.host }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Port</div>
+            <div class="rc-info-item-value">{{ connection_info.port }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Database</div>
+            <div class="rc-info-item-value">{{ connection_info.db }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Password</div>
+            <div class="rc-info-item-value">{{ "Configured" if connection_info.password_configured else "Not set" }}</div>
+        </div>
+
+        {% if server_info %}
+        <div>
+            <div class="rc-info-item-label">Redis Version</div>
+            <div class="rc-info-item-value">{{ server_info.redis_version or "—" }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Role</div>
+            <div class="rc-info-item-value">{{ server_info.role or "—" }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Used Memory</div>
+            <div class="rc-info-item-value">{{ server_info.used_memory_human or "—" }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Connected Clients</div>
+            <div class="rc-info-item-value">{{ server_info.connected_clients if server_info.connected_clients is not none else "—" }}</div>
+        </div>
+        <div>
+            <div class="rc-info-item-label">Uptime (days)</div>
+            <div class="rc-info-item-value">{{ server_info.uptime_in_days if server_info.uptime_in_days is not none else "—" }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="rc-panel">
+    <div class="rc-panel-header">
+        <i class="bi bi-sliders"></i>
+        Editable Settings
+    </div>
+
+    <div class="rc-persist-note">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>
+            Changes here apply immediately but are not written to
+            <code>redis.conf</code>. Without a <code>CONFIG REWRITE</code>
+            or a manual config file update, a Redis restart will revert
+            these values to their file-configured defaults.
+        </span>
+    </div>
+
+    {% if is_editor %}
+    <div class="rc-editable-list">
+        {% for key, meta in editable_config.items() %}
+        <form method="post" action="/redis/config/save" class="rc-editable-row">
+            <div>
+                <div class="rc-editable-key">{{ key }}</div>
+                <div class="rc-editable-desc">{{ meta.description }}</div>
+            </div>
+
+            <div class="rc-editable-input">
+                <label for="value-{{ key }}">Value</label>
+                <input
+                        type="text"
+                        id="value-{{ key }}"
+                        name="value"
+                        value="{{ meta.value }}"
+                        required>
+                <input type="hidden" name="key" value="{{ key }}">
+            </div>
+
+            <button type="submit" class="rc-save-btn">
+                <i class="bi bi-save"></i>
+                Save
+            </button>
+        </form>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="rc-readonly-note">
+        You have read-only access. Contact an administrator to change these settings.
+    </div>
+    {% endif %}
+</div>
+
+<div class="rc-panel">
+    <div class="rc-panel-header">
+        <i class="bi bi-list-columns-reverse"></i>
+        Full Runtime Configuration
+    </div>
+
+    <div class="rc-search">
+        <i class="bi bi-search"></i>
+        <input
+                type="text"
+                id="rcConfigSearch"
+                placeholder="Filter configuration keys..."
+                oninput="filterRedisConfigTable(this.value)">
+    </div>
+
+    <div class="rc-config-table-wrapper">
+        <table class="rc-config-table" id="rcConfigTable">
+            <thead>
+            <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, value in all_config.items() %}
+            <tr class="rc-config-row" data-search="{{ key|lower }}">
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">No configuration data available.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function filterRedisConfigTable(query) {
+        const normalized = query.trim().toLowerCase();
+        const rows = document.querySelectorAll("#rcConfigTable tbody .rc-config-row");
+
+        rows.forEach(row => {
+            const haystack = row.getAttribute("data-search") || "";
+            row.style.display = haystack.includes(normalized) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

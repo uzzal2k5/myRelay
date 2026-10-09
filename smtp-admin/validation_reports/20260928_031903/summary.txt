@@ -1,0 +1,11 @@
+==================================================
+VALIDATION SUMMARY
+==================================================
+Project: /home/shafiqul.islam/smtp-portal/smtp-admin
+Date: Mon Sep 28 03:19:19 AM +06 2026
+Passed checks: 1
+Failed checks: 9
+Skipped checks: 1
+Report directory: /home/shafiqul.islam/smtp-portal/smtp-admin/validation_reports/20260928_031903
+==================================================
+RESULT: Validation findings require review.

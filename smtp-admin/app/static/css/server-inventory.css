@@ -1,0 +1,90 @@
+:root {
+    --si-border: #e2e8f0;
+    --si-muted: #64748b;
+    --si-text: #172033;
+    --si-bg-subtle: #f8fafc;
+    --si-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --si-primary: #1d4ed8;
+    --si-primary-hover: #1a41b8;
+    --si-ok: #15803d;
+    --si-ok-bg: #ecfdf5;
+    --si-bad: #b91c1c;
+    --si-bad-bg: #fef2f2;
+    --si-prod: #b91c1c;
+    --si-prod-bg: #fef2f2;
+    --si-staging: #b45309;
+    --si-staging-bg: #fffbeb;
+    --si-dev: #15803d;
+    --si-dev-bg: #ecfdf5;
+}
+
+.si-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.si-header h2 { margin: 0 0 4px; font-size: 26px; font-weight: 700; color: var(--si-text); }
+.si-subtitle { margin: 0; color: var(--si-muted); font-size: 14px; }
+
+.si-add-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+    border-radius: 8px; border: 1px solid var(--si-primary); background: var(--si-primary);
+    color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;
+}
+.si-add-btn:hover { background: var(--si-primary-hover); }
+
+.si-alert {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+    margin-bottom: 18px; border-radius: 8px; font-size: 13px; border: 1px solid transparent;
+}
+.si-alert.is-error { background: var(--si-bad-bg); border-color: #fecaca; border-left: 3px solid var(--si-bad); color: var(--si-bad); }
+.si-alert.is-success { background: var(--si-ok-bg); border-color: #a7f3d0; border-left: 3px solid var(--si-ok); color: var(--si-ok); }
+
+.si-form-panel {
+    background: #fff; border: 1px solid var(--si-border); border-radius: 12px;
+    box-shadow: var(--si-shadow); padding: 20px; margin-bottom: 20px; display: none;
+}
+.si-form-panel.is-open { display: block; }
+
+.si-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 14px; }
+.si-field label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; color: var(--si-muted); text-transform: uppercase; }
+.si-field input, .si-field select {
+    box-sizing: border-box; width: 100%; padding: 9px 12px; font-size: 14px;
+    border: 1px solid #cbd5e1; border-radius: 8px; color: var(--si-text);
+}
+
+.si-table-wrapper { width: 100%; overflow-x: auto; }
+.si-panel { background: #fff; border: 1px solid var(--si-border); border-radius: 12px; box-shadow: var(--si-shadow); overflow: hidden; }
+.si-table { width: 100%; border-collapse: collapse; }
+.si-table th {
+    text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    color: var(--si-muted); background: var(--si-bg-subtle); border-bottom: 1px solid var(--si-border);
+}
+.si-table td { padding: 12px 16px; font-size: 13px; color: var(--si-text); border-bottom: 1px solid var(--si-border); }
+.si-table tbody tr:last-child td { border-bottom: 0; }
+.si-table tbody tr:hover { background: var(--si-bg-subtle); }
+
+.si-hostname { font-family: Consolas, monospace; font-size: 12.5px; color: var(--si-muted); }
+
+.si-badge { display: inline-flex; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
+.si-badge.env-production { background: var(--si-prod-bg); color: var(--si-prod); }
+.si-badge.env-staging { background: var(--si-staging-bg); color: var(--si-staging); }
+.si-badge.env-development { background: var(--si-dev-bg); color: var(--si-dev); }
+
+.si-check-btn, .si-delete-btn {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 6px;
+    border: 1px solid var(--si-border); background: #fff; color: var(--si-text); font-size: 11.5px;
+    font-weight: 600; cursor: pointer;
+}
+.si-delete-btn { border-color: #fecaca; color: var(--si-bad); }
+.si-delete-btn:hover { background: var(--si-bad-bg); }
+
+.si-check-result { margin-top: 4px; font-size: 11px; }
+.si-check-result.is-ok { color: var(--si-ok); }
+.si-check-result.is-bad { color: var(--si-bad); }
+
+.si-empty { padding: 40px 20px; text-align: center; color: var(--si-muted); font-style: italic; }

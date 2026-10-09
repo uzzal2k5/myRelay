@@ -1,0 +1,320 @@
+:root {
+    --ipm-border: #e2e8f0;
+    --ipm-muted: #64748b;
+    --ipm-text: #172033;
+    --ipm-bg-subtle: #f8fafc;
+    --ipm-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --ipm-primary: #1d4ed8;
+    --ipm-primary-hover: #1a41b8;
+    --ipm-allow: #15803d;
+    --ipm-allow-bg: #ecfdf5;
+    --ipm-allow-border: #a7f3d0;
+    --ipm-deny: #b45309;
+    --ipm-deny-bg: #fffbeb;
+    --ipm-deny-border: #fde68a;
+    --ipm-block: #b91c1c;
+    --ipm-block-bg: #fef2f2;
+    --ipm-block-border: #fecaca;
+    --ipm-success-bg: #ecfdf5;
+    --ipm-success-border: #a7f3d0;
+    --ipm-success-text: #166534;
+    --ipm-error-bg: #fef2f2;
+    --ipm-error-border: #fecaca;
+    --ipm-error-text: #991b1b;
+}
+
+.ipm-header {
+    margin-bottom: 20px;
+}
+
+.ipm-header h2 {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ipm-text);
+    letter-spacing: -0.01em;
+}
+
+.ipm-subtitle {
+    margin: 0;
+    color: var(--ipm-muted);
+    font-size: 14px;
+}
+
+.notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+
+.notice i {
+    font-size: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.notice-success {
+    background: var(--ipm-success-bg);
+    border-color: var(--ipm-success-border);
+    border-left: 3px solid var(--ipm-success-text);
+    color: var(--ipm-success-text);
+}
+
+.notice-error {
+    background: var(--ipm-error-bg);
+    border-color: var(--ipm-error-border);
+    border-left: 3px solid var(--ipm-error-text);
+    color: var(--ipm-error-text);
+}
+
+.policy-section {
+    background: #fff;
+    border: 1px solid var(--ipm-border);
+    border-radius: 12px;
+    box-shadow: var(--ipm-shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.policy-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    background: var(--ipm-bg-subtle);
+    user-select: none;
+}
+
+.policy-header:hover {
+    background: #f1f5f9;
+}
+
+.policy-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.policy-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.policy-icon.is-allow {
+    background: var(--ipm-allow-bg);
+    color: var(--ipm-allow);
+}
+
+.policy-icon.is-deny {
+    background: var(--ipm-deny-bg);
+    color: var(--ipm-deny);
+}
+
+.policy-icon.is-block {
+    background: var(--ipm-block-bg);
+    color: var(--ipm-block);
+}
+
+.policy-title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.policy-title strong {
+    font-size: 15px;
+    color: var(--ipm-text);
+}
+
+.policy-title small {
+    font-family: Consolas, "SFMono-Regular", monospace;
+    color: var(--ipm-muted);
+    font-size: 11.5px;
+    overflow-wrap: anywhere;
+}
+
+.policy-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.policy-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.policy-count.is-allow {
+    background: var(--ipm-allow-bg);
+    color: var(--ipm-allow);
+}
+
+.policy-count.is-deny {
+    background: var(--ipm-deny-bg);
+    color: var(--ipm-deny);
+}
+
+.policy-count.is-block {
+    background: var(--ipm-block-bg);
+    color: var(--ipm-block);
+}
+
+.policy-arrow {
+    font-size: 14px;
+    transition: transform 0.2s ease;
+    color: var(--ipm-muted);
+}
+
+.policy-section.open .policy-arrow {
+    transform: rotate(180deg);
+}
+
+.policy-content {
+    display: none;
+    padding: 20px;
+    border-top: 1px solid var(--ipm-border);
+}
+
+.policy-section.open .policy-content {
+    display: block;
+}
+
+.policy-columns {
+    display: grid;
+    grid-template-columns: 1fr 64px 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.policy-box label {
+    display: block;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+    color: var(--ipm-muted);
+}
+
+.policy-box textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 13px;
+    color: var(--ipm-text);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.policy-box textarea:focus {
+    outline: none;
+    border-color: var(--ipm-primary);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+}
+
+.policy-box select {
+    width: 100%;
+    min-height: 160px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 6px;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 13px;
+    color: var(--ipm-text);
+    background: #fff;
+}
+
+.policy-box select option {
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+.policy-box select option:checked {
+    background: #dbeafe;
+}
+
+.policy-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.policy-actions button {
+    width: 40px;
+    height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ipm-text);
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.policy-actions button:hover {
+    background: var(--ipm-bg-subtle);
+    box-shadow: var(--ipm-shadow);
+}
+
+.apply-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 10px 18px;
+    border: 1px solid var(--ipm-primary);
+    border-radius: 8px;
+    background: var(--ipm-primary);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.apply-button:hover {
+    background: var(--ipm-primary-hover);
+}
+
+@media (max-width: 800px) {
+    .policy-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .policy-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .policy-header {
+        flex-wrap: wrap;
+    }
+}

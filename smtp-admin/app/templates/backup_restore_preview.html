@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/backups.css">
+
+<a class="bkp-back" href="/backups"><i class="bi bi-arrow-left"></i>Back to Backups</a>
+
+{% if error %}
+<div class="bk-alert is-error"><i class="bi bi-exclamation-triangle-fill"></i><span>{{ error }}</span></div>
+{% endif %}
+
+{% if preview %}
+<div class="bk-header">
+    <div>
+        <h2>Restore Preview</h2>
+        <p class="bk-subtitle">{{ preview.original_name }} — {{ preview.target_path }}</p>
+    </div>
+</div>
+
+<div class="bkp-summary-grid">
+    <div class="bkp-summary-tile">
+        <div class="bkp-summary-label">Lines added</div>
+        <div class="bkp-summary-value is-added">+{{ preview.added }}</div>
+    </div>
+    <div class="bkp-summary-tile">
+        <div class="bkp-summary-label">Lines removed</div>
+        <div class="bkp-summary-value is-removed">-{{ preview.removed }}</div>
+    </div>
+    <div class="bkp-summary-tile">
+        <div class="bkp-summary-label">Current file</div>
+        <div class="bkp-summary-value">{{ preview.current_line_count }} lines</div>
+    </div>
+    <div class="bkp-summary-tile">
+        <div class="bkp-summary-label">Backup file</div>
+        <div class="bkp-summary-value">{{ preview.backup_line_count }} lines</div>
+    </div>
+</div>
+
+<div class="bk-panel">
+    {% if preview.identical %}
+    <div class="bkp-identical-note">
+        <i class="bi bi-check-circle-fill"></i>
+        This backup is identical to the current live file. Restoring it would make no change.
+    </div>
+    {% else %}
+    <pre class="bkp-diff">{% for line in preview.diff_lines %}{% if line.startswith("+++") or line.startswith("---") or line.startswith("@@") %}<span class="bkp-diff-line is-meta">{{ line }}</span>
+{% elif line.startswith("+") %}<span class="bkp-diff-line is-add">{{ line }}</span>
+{% elif line.startswith("-") %}<span class="bkp-diff-line is-remove">{{ line }}</span>
+{% else %}<span class="bkp-diff-line is-context">{{ line }}</span>
+{% endif %}{% endfor %}</pre>
+    {% endif %}
+
+    <div class="bkp-confirm-bar">
+        <span class="bkp-confirm-text">
+            Restoring will back up the current file first, rebuild the map database if needed,
+            validate with <code>postfix check</code>, and reload Postfix. If validation fails,
+            the change is automatically rolled back.
+        </span>
+
+        <form method="post" action="/backups/restore"
+              onsubmit="return confirm('Confirm restore of {{ preview.original_name }}? This takes effect immediately after validation passes.');">
+            <input type="hidden" name="filename" value="{{ filename }}">
+            <button type="submit" class="bkp-confirm-btn" {{ "disabled" if preview.identical }}>
+            <i class="bi bi-arrow-counterclockwise"></i>
+            Confirm Restore
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

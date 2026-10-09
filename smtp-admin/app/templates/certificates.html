@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/css/certificates.css">
+
+<div class="container">
+    <h1>SMTP Certificate Management</h1>
+    <p>Manage public TLS certificate files under <code>/etc/postfix/tls/</code>.</p>
+
+    {% if request.query_params.get("saved") == "1" %}
+    <div class="notice">Certificate saved successfully.</div>
+    {% endif %}
+
+    {% if request.query_params.get("error") %}
+    <div class="notice error">
+        Certificate update failed. Review the application logs for details.
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="notice error">{{ error }}</div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Certificate File</h2>
+
+        <form method="get" action="/certificates" class="toolbar">
+            <label for="filename">Certificate:</label>
+            <select id="filename" name="filename" onchange="this.form.submit()">
+                {% for cert in certificates %}
+                <option value="{{ cert }}"
+                        {% if cert == selected_certificate %}selected{% endif %}>
+                    {{ cert }}
+                </option>
+                {% endfor %}
+            </select>
+            <noscript><button type="submit">Load</button></noscript>
+        </form>
+
+        {% if selected_certificate %}
+        <form method="post" action="/certificates/save" id="certificate-form">
+            <input type="hidden" name="filename" value="{{ selected_certificate }}">
+
+            <div class="toolbar">
+                <button type="button" id="edit-button" onclick="enableEdit()">
+                    Edit
+                </button>
+
+                <button type="submit" id="save-button" disabled>
+                    Save Certificate
+                </button>
+
+                <button type="button" class="secondary" id="cancel-button"
+                        onclick="cancelEdit()" disabled>
+                    Cancel
+                </button>
+
+                <span id="edit-status">Read-only</span>
+            </div>
+
+            <textarea
+                    id="certificate-text"
+                    name="certificate_text"
+                    readonly
+                    spellcheck="false"
+                    required>{{ certificate_text }}</textarea>
+
+            <p>
+                Saving updates the selected certificate file and creates a backup.
+                Private-key files are not displayed or modified here.
+            </p>
+        </form>
+        {% else %}
+        <p>No certificate files ending in <code>.crt</code> were found.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Parsed Certificate Details</h2>
+
+        {% if certificate_details %}
+        <div class="details">
+            <strong>File</strong>
+            <span>{{ certificate_details.filename }}</span>
+
+            <strong>Subject</strong>
+            <span>{{ certificate_details.subject }}</span>
+
+            <strong>Issuer</strong>
+            <span>{{ certificate_details.issuer }}</span>
+
+            <strong>Serial Number</strong>
+            <span>{{ certificate_details.serial_number }}</span>
+
+            <strong>Version</strong>
+            <span>{{ certificate_details.version }}</span>
+
+            <strong>Valid From</strong>
+            <span>{{ certificate_details.valid_from }}</span>
+
+            <strong>Valid Until</strong>
+            <span>{{ certificate_details.valid_until }}</span>
+
+            <strong>Status</strong>
+            <span class="status">{{ certificate_details.status }}</span>
+
+            <strong>Subject Alternative Names</strong>
+            <span>
+                {% if certificate_details.subject_alt_names %}
+                    {% for san in certificate_details.subject_alt_names %}
+                        {{ san }}<br>
+                    {% endfor %}
+                {% else %}
+                    Not available
+                {% endif %}
+            </span>
+        </div>
+        {% else %}
+        <p>No parsed certificate details are available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const certificateTextarea = document.getElementById("certificate-text");
+    const editButton = document.getElementById("edit-button");
+    const saveButton = document.getElementById("save-button");
+    const cancelButton = document.getElementById("cancel-button");
+    const editStatus = document.getElementById("edit-status");
+
+    let originalCertificate = certificateTextarea
+        ? certificateTextarea.value
+        : "";
+
+    function enableEdit() {
+        if (!certificateTextarea) return;
+
+        originalCertificate = certificateTextarea.value;
+        certificateTextarea.readOnly = false;
+        editButton.disabled = true;
+        saveButton.disabled = false;
+        cancelButton.disabled = false;
+        editStatus.textContent = "Editing";
+        certificateTextarea.focus();
+    }
+
+    function cancelEdit() {
+        if (!certificateTextarea) return;
+
+        certificateTextarea.value = originalCertificate;
+        certificateTextarea.readOnly = true;
+        editButton.disabled = false;
+        saveButton.disabled = true;
+        cancelButton.disabled = true;
+        editStatus.textContent = "Read-only";
+    }
+
+    if (certificateTextarea) {
+        document.getElementById("certificate-form").addEventListener(
+            "submit",
+            function (event) {
+                if (!confirm(
+                    "Save this certificate? The current file will be backed up."
+                )) {
+                    event.preventDefault();
+                }
+            }
+        );
+    }
+</script>
+{% endblock %}

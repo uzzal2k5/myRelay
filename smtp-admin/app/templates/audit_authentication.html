@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/audit.css">
+
+<div class="audit-header">
+    <div>
+        <h2>Authentication Logs</h2>
+        <p class="audit-subtitle">Login, logout, and authentication-related events from the audit log.</p>
+    </div>
+
+    <div class="audit-search">
+        <i class="bi bi-search"></i>
+        <input
+                type="text"
+                id="authSearchInput"
+                value="{{ search_query }}"
+                placeholder="Filter by user or IP..."
+                oninput="filterAuthTable(this.value)">
+    </div>
+</div>
+
+{% if error %}
+<div class="audit-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="audit-summary-grid">
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-total"><i class="bi bi-list-check"></i></div>
+        <div>
+            <div class="audit-summary-label">Total Events</div>
+            <div class="audit-summary-value">{{ entries|length }}</div>
+        </div>
+    </div>
+
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-success"><i class="bi bi-check-circle-fill"></i></div>
+        <div>
+            <div class="audit-summary-label">Successful</div>
+            <div class="audit-summary-value">{{ success_count }}</div>
+        </div>
+    </div>
+
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-failed"><i class="bi bi-x-circle-fill"></i></div>
+        <div>
+            <div class="audit-summary-label">Failed</div>
+            <div class="audit-summary-value">{{ failed_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="audit-panel">
+    {% if entries %}
+    <div class="audit-table-wrapper">
+        <table class="audit-table" id="authTable">
+            <thead>
+            <tr>
+                <th scope="col">Timestamp</th>
+                <th scope="col">User</th>
+                <th scope="col">Event</th>
+                <th scope="col">Source IP</th>
+                <th scope="col">Details</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for entry in entries %}
+            {% set result = (entry.result or "") | upper %}
+
+            <tr class="audit-row" data-search="{{ (entry.username or '') ~ ' ' ~ (entry.source_ip or '') | lower }}">
+
+                <td class="audit-timestamp">{{ entry.timestamp or "—" }}</td>
+
+                <td>
+                    <span class="audit-user">{{ entry.username or "unknown" }}</span>
+                    {% if entry.role %}
+                    <span class="audit-role">{{ entry.role }}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <span class="audit-badge {{ 'is-delete' if result == 'FAILED' else 'is-update' }}">{{ entry.action }}</span>
+
+                    {% if result %}
+                    <div class="audit-result-dot {{ 'is-success' if result == 'SUCCESS' else 'is-failed' if result == 'FAILED' else '' }}">
+                        {{ result }}
+                    </div>
+                    {% endif %}
+                </td>
+
+                <td class="audit-ip">{{ entry.source_ip or "—" }}</td>
+
+                <td>
+                    <details class="audit-details">
+                        <summary>View raw</summary>
+                        <pre class="audit-raw">{{ entry._raw }}</pre>
+                    </details>
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="audit-empty">
+        No authentication events recorded. If login/logout aren't being audited yet,
+        this page will stay empty until that's wired up.
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function filterAuthTable(query) {
+        const normalized = query.trim().toLowerCase();
+        const rows = document.querySelectorAll("#authTable tbody .audit-row");
+
+        rows.forEach(row => {
+            const haystack = row.getAttribute("data-search") || "";
+            row.style.display = haystack.includes(normalized) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

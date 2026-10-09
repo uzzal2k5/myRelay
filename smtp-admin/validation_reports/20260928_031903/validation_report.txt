@@ -1,0 +1,74 @@
+==================================================
+MuktoPay Codebase Validation Report
+Project: /home/shafiqul.islam/smtp-portal/smtp-admin
+Date: Mon Sep 28 03:19:03 AM +06 2026
+==================================================
+[2026-09-28 03:19:03] Checking Git status
+[2026-09-28 03:19:03] SKIP: Git repository not detected
+Python 3.9.25
+[2026-09-28 03:19:03] START: install_project_dependencies
+FAIL: install_project_dependencies (exit 1)
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/fastapi/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/fastapi/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/fastapi/
+WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/fastapi/
+WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/fastapi/
+Could not fetch URL https://pypi.org/simple/fastapi/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url: /simple/fastapi/ (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))) - skipping
+ERROR: Could not find a version that satisfies the requirement fastapi==0.116.1 (from versions: none)
+ERROR: No matching distribution found for fastapi==0.116.1
+Could not fetch URL https://pypi.org/simple/pip/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url: /simple/pip/ (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))) - skipping
+
+[2026-09-28 03:19:11] START: install_validation_tools
+FAIL: install_validation_tools (exit 1)
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/ruff/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/ruff/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/ruff/
+WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/ruff/
+WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))': /simple/ruff/
+Could not fetch URL https://pypi.org/simple/ruff/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url: /simple/ruff/ (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))) - skipping
+ERROR: Could not find a version that satisfies the requirement ruff (from versions: none)
+ERROR: No matching distribution found for ruff
+Could not fetch URL https://pypi.org/simple/pip/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url: /simple/pip/ (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1147)'))) - skipping
+
+[2026-09-28 03:19:19] START: python_syntax
+PASS: python_syntax
+
+[2026-09-28 03:19:19] START: ruff_lint
+FAIL: ruff_lint (exit 127)
+validate_codebase.sh: line 42: ruff: command not found
+
+[2026-09-28 03:19:19] START: ruff_format
+FAIL: ruff_format (exit 127)
+validate_codebase.sh: line 42: ruff: command not found
+
+[2026-09-28 03:19:19] START: mypy_type_check
+FAIL: mypy_type_check (exit 127)
+validate_codebase.sh: line 42: mypy: command not found
+
+[2026-09-28 03:19:19] START: bandit_security_scan
+FAIL: bandit_security_scan (exit 127)
+validate_codebase.sh: line 42: bandit: command not found
+
+[2026-09-28 03:19:19] START: dependency_security_scan
+FAIL: dependency_security_scan (exit 127)
+validate_codebase.sh: line 42: pip-audit: command not found
+
+[2026-09-28 03:19:19] START: pytest_tests
+FAIL: pytest_tests (exit 127)
+validate_codebase.sh: line 42: pytest: command not found
+
+[2026-09-28 03:19:19] START: pytest_coverage
+FAIL: pytest_coverage (exit 127)
+validate_codebase.sh: line 42: pytest: command not found
+
+==================================================
+VALIDATION SUMMARY
+==================================================
+Project: /home/shafiqul.islam/smtp-portal/smtp-admin
+Date: Mon Sep 28 03:19:19 AM +06 2026
+Passed checks: 1
+Failed checks: 9
+Skipped checks: 1
+Report directory: /home/shafiqul.islam/smtp-portal/smtp-admin/validation_reports/20260928_031903
+==================================================
+RESULT: Validation findings require review.

@@ -1,0 +1,160 @@
+
+/* ==============================
+   SMTP Relay Top Navigation
+   ============================== */
+
+.relay-navbar {
+    min-height: 72px;
+    background-color: #172238;
+    border-bottom: 1px solid #26364f;
+    padding: 8px 18px;
+    z-index: 1030;
+}
+
+/* Brand */
+
+.relay-navbar .navbar-brand {
+    color: #ffffff;
+    margin-right: 35px;
+}
+
+.relay-logo {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8de7f5;
+    background: #1d304a;
+    border: 1px solid #29445f;
+    border-radius: 6px;
+    font-size: 20px;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.brand-name {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.brand-subtitle {
+    font-size: 7px;
+    color: #8da5c5;
+    letter-spacing: 0.8px;
+    margin-top: 3px;
+}
+
+/* Navigation Links */
+
+.relay-navbar .nav-link {
+    color: #d7dfed;
+    font-size: 14px;
+    padding: 10px 14px;
+    transition: background-color 0.2s ease;
+}
+
+.relay-navbar .nav-link:hover,
+.relay-navbar .nav-link:focus {
+    color: #ffffff;
+    background-color: #24344f;
+    border-radius: 5px;
+}
+
+/* System Status */
+
+.status-indicator {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 5px;
+    background-color: #28c76f;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+/* Notifications */
+
+.notification-link {
+    position: relative;
+    font-size: 17px !important;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dc3545;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* User Profile */
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Dropdown Menus */
+
+.relay-navbar .dropdown-menu {
+    min-width: 220px;
+    margin-top: 8px;
+    padding: 6px;
+    border: 1px solid #dce2ea;
+    border-radius: 7px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+}
+
+.relay-navbar .dropdown-item {
+    padding: 9px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+
+.relay-navbar .dropdown-item:hover {
+    background-color: #edf3fa;
+}
+
+.relay-navbar .dropdown-header {
+    font-weight: 600;
+}
+
+/* Mobile */
+
+@media (max-width: 991.98px) {
+    .relay-navbar {
+        padding: 10px 14px;
+    }
+
+    .relay-navbar .navbar-collapse {
+        padding-top: 12px;
+    }
+
+    .relay-navbar .nav-link {
+        padding: 10px;
+    }
+
+    .relay-navbar .navbar-nav {
+        align-items: stretch !important;
+    }
+
+    .relay-navbar .dropdown-menu {
+        margin-top: 2px;
+    }
+}

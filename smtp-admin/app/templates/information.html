@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h3 class="mb-1">
+                <i class="bi bi-server me-2"></i>
+                SMTP System Information
+            </h3>
+
+            <div class="text-muted">
+                Server infrastructure and SMTP platform status
+            </div>
+        </div>
+
+        <div>
+            <span class="badge bg-success">
+                <i class="bi bi-check-circle me-1"></i>
+                System Online
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- Server Identity -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>
+                <i class="bi bi-pc-display me-2"></i>
+                Server Identity
+            </strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Hostname</label>
+                    <div class="fw-semibold">
+                        {{ system.hostname }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">FQDN</label>
+                    <div class="fw-semibold">
+                        {{ system.fqdn }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">IP Address</label>
+                    <div class="fw-semibold">
+                        {{ system.ip_address }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Architecture</label>
+                    <div class="fw-semibold">
+                        {{ system.architecture }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Operating System</label>
+                    <div class="fw-semibold">
+                        {{ system.os }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Kernel</label>
+                    <div class="fw-semibold">
+                        {{ system.kernel }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">CPU</label>
+                    <div class="fw-semibold">
+                        {{ system.cpu_count }} vCPU
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Timezone</label>
+                    <div class="fw-semibold">
+                        {{ system.timezone }}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Software -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>
+                <i class="bi bi-box-seam me-2"></i>
+                SMTP Software Stack
+            </strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Postfix</label>
+                    <div class="fw-semibold">
+                        {{ software.postfix }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Python</label>
+                    <div class="fw-semibold">
+                        {{ software.python }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Redis</label>
+                    <div class="fw-semibold">
+                        {{ software.redis }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">Nginx</label>
+                    <div class="fw-semibold">
+                        {{ software.nginx }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="text-muted small">OpenSSL</label>
+                    <div class="fw-semibold">
+                        {{ software.openssl }}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Service Status -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>
+                <i class="bi bi-activity me-2"></i>
+                Service Status
+            </strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                {% for name, status in services.items() %}
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="border rounded p-3">
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="fw-semibold">
+                                {{ name|replace("_", " ")|title }}
+                            </span>
+
+                            {% if status == "active" %}
+
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+
+                            {% elif status == "inactive" %}
+
+                            <span class="badge bg-secondary">
+                                Inactive
+                            </span>
+
+                            {% else %}
+
+                            <span class="badge bg-danger">
+                                {{ status|title }}
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Resource Usage -->
+
+    <div class="row mb-4">
+
+        <!-- Memory -->
+
+        <div class="col-md-6">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header">
+                    <strong>
+                        <i class="bi bi-memory me-2"></i>
+                        Memory
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Used</span>
+                        <strong>
+                            {{ memory.used }} / {{ memory.total }}
+                        </strong>
+                    </div>
+
+                    <div class="progress" style="height: 10px;">
+
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width: {{ memory.percent }}%;">
+                        </div>
+
+                    </div>
+
+                    <div class="text-muted mt-2">
+                        {{ memory.percent }}% utilized
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Disk -->
+
+        <div class="col-md-6">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header">
+                    <strong>
+                        <i class="bi bi-device-hdd me-2"></i>
+                        Root Filesystem
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Used</span>
+                        <strong>
+                            {{ disk.used }} / {{ disk.total }}
+                        </strong>
+                    </div>
+
+                    <div class="progress" style="height: 10px;">
+
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width: {{ disk.percent }}%;">
+                        </div>
+
+                    </div>
+
+                    <div class="text-muted mt-2">
+                        {{ disk.percent }}% utilized
+                        · {{ disk.free }} free
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Runtime Information -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>
+                <i class="bi bi-clock-history me-2"></i>
+                Runtime Information
+            </strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label class="text-muted small">
+                        Server Uptime
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ system.uptime }}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="text-muted small">
+                        Server Time
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ system.current_time }}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="text-muted small">
+                        Timezone
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ system.timezone }}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <div class="text-muted small">
+
+        <i class="bi bi-shield-check me-1"></i>
+
+        System information is read-only and collected directly
+        from the SMTP server.
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/postfix.css">
+
+{% set check_text = (check or "") | trim %}
+{% set check_is_empty = check_text == "" %}
+
+<div class="postfix-header">
+    <h2>Postfix Control</h2>
+    <p class="postfix-subtitle">Validate the running configuration or reload the Postfix service.</p>
+</div>
+
+{% if error %}
+<div class="postfix-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="postfix-actions">
+    <form method="post" action="/postfix/check">
+        <button type="submit" class="postfix-btn">
+            <i class="bi bi-check2-circle"></i>
+            Validate Configuration
+        </button>
+    </form>
+
+    <form method="post" action="/postfix/reload">
+        <button type="submit" class="postfix-btn postfix-btn-primary">
+            <i class="bi bi-arrow-repeat"></i>
+            Reload Postfix
+        </button>
+    </form>
+</div>
+
+<div class="postfix-panel">
+    <div class="postfix-panel-header">
+        <i class="bi bi-terminal"></i>
+        Result
+    </div>
+
+    {% if check_is_empty %}
+    <div class="postfix-output is-empty">No output yet. Run a validation or reload above.</div>
+    {% else %}
+    <pre class="postfix-output">{{ check_text }}</pre>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,3 @@
+# The web application MUST NOT have unrestricted sudo.
+# This rule allows only the fixed helper executable.
+smtpadmin ALL=(root) NOPASSWD: /usr/local/sbin/smtp-admin-postfix-helper

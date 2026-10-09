@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/relayhost.css">
+
+{% set is_configured = relayhost.configured %}
+
+<div class="relayhost-header">
+    <div>
+        <h2>Postfix Relayhost</h2>
+        <p class="relayhost-subtitle">Configure the outbound SMTP relay server.</p>
+    </div>
+
+    <span class="relayhost-status-pill {{ 'is-configured' if is_configured else 'is-unconfigured' }}">
+        {{ "Configured" if is_configured else "Not Configured" }}
+    </span>
+</div>
+
+{% if error %}
+<div class="relayhost-alert is-error">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span><strong>Error:</strong> {{ error }}</span>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="relayhost-alert is-success">
+    <i class="bi bi-check-circle-fill"></i>
+    <span><strong>Success:</strong> {{ success }}</span>
+</div>
+{% endif %}
+
+<div class="relayhost-panel">
+    <div class="relayhost-panel-header">
+        <i class="bi bi-diagram-3"></i>
+        Relayhost Configuration
+    </div>
+
+    <div class="relayhost-panel-body">
+        <form method="post" action="/relay/endpoint/update">
+
+            <div class="relayhost-fields">
+
+                <div class="relayhost-field">
+                    <label for="endpoint">Endpoint</label>
+                    <input
+                            type="text"
+                            id="endpoint"
+                            name="endpoint"
+                            value="{{ relayhost.endpoint }}"
+                            placeholder="muktopay-com.mail.protection.outlook.com"
+                            required>
+                    <div class="relayhost-field-hint">SMTP relay hostname or FQDN.</div>
+                </div>
+
+                <div class="relayhost-field">
+                    <label for="port">Port</label>
+                    <input
+                            type="number"
+                            id="port"
+                            name="port"
+                            value="{{ relayhost.port or '25' }}"
+                            min="1"
+                            max="65535"
+                            required>
+                    <div class="relayhost-field-hint">SMTP relay port.</div>
+                </div>
+
+            </div>
+
+            <div class="relayhost-current-label">
+                <span>Current Postfix Configuration</span>
+                <button type="button" class="relayhost-copy-btn" onclick="copyRelayhostConfig()">
+                    <i class="bi bi-clipboard"></i>
+                    <span id="relayhostCopyLabel">Copy</span>
+                </button>
+            </div>
+
+            {% if relayhost.raw %}
+            <pre class="relayhost-current-value" id="relayhostRawValue">relayhost = {{ relayhost.raw }}</pre>
+            {% else %}
+            <pre class="relayhost-current-value is-unset" id="relayhostRawValue">Not configured</pre>
+            {% endif %}
+
+            <div class="relayhost-actions">
+                <button type="submit" class="relayhost-btn relayhost-btn-primary">
+                    <i class="bi bi-save"></i>
+                    Update Relayhost
+                </button>
+
+                <a href="/relay/endpoint" class="relayhost-btn">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Reload
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function copyRelayhostConfig() {
+        const valueElement = document.getElementById("relayhostRawValue");
+        const label = document.getElementById("relayhostCopyLabel");
+
+        if (!valueElement) return;
+
+        navigator.clipboard.writeText(valueElement.textContent.trim()).then(() => {
+            const original = label.textContent;
+            label.textContent = "Copied!";
+
+            setTimeout(() => {
+                label.textContent = original;
+            }, 1500);
+        }).catch(() => {
+            label.textContent = "Copy failed";
+        });
+    }
+</script>
+{% endblock %}

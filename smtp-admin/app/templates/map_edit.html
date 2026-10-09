@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/map-edit.css">
+
+<a class="map-edit-back" href="/postfix/policies">
+    <i class="bi bi-arrow-left"></i>
+    Back to Discovered Maps
+</a>
+
+<div class="map-edit-header">
+    <h2>Existing Postfix Map</h2>
+
+    {% if readonly %}
+    <span class="map-edit-readonly-badge">
+        <i class="bi bi-lock-fill"></i>
+        Read-only
+    </span>
+    {% endif %}
+</div>
+
+<div class="map-edit-path">
+    <i class="bi bi-file-earmark-text"></i>
+    {{ path }}
+</div>
+
+{% if error %}
+<div class="map-edit-alert is-error">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="map-edit-alert is-warning">
+    <i class="bi bi-shield-exclamation"></i>
+    <span>
+        Changes are made directly to the existing Postfix map. The file is
+        backed up first, then validated with <code>postfix check</code>,
+        and reloaded only after successful validation.
+    </span>
+</div>
+
+<div class="map-edit-panel">
+    <div class="map-edit-panel-header">
+        <span><i class="bi bi-code-slash"></i>Map Contents</span>
+    </div>
+
+    {% if readonly %}
+    <textarea class="map-edit-textarea" rows="24" readonly>{{ lines }}</textarea>
+    {% else %}
+    <form method="post" action="/policies/map" id="mapEditForm" onsubmit="return confirmMapSave();">
+        <input type="hidden" name="path" value="{{ path }}">
+        <textarea
+                class="map-edit-textarea"
+                rows="24"
+                name="content"
+                spellcheck="false"
+                id="mapEditTextarea">{{ lines }}</textarea>
+    </form>
+    {% endif %}
+</div>
+
+{% if not readonly %}
+<div class="map-edit-actions">
+    <button type="submit" form="mapEditForm" class="map-edit-btn map-edit-btn-primary">
+        <i class="bi bi-save"></i>
+        Save, Validate &amp; Reload
+    </button>
+
+    <a class="map-edit-btn" href="/postfix/policies">
+        <i class="bi bi-x-circle"></i>
+        Cancel
+    </a>
+</div>
+{% endif %}
+
+<script>
+    function confirmMapSave() {
+        return confirm(
+            "Save this map? The file will be backed up, validated with " +
+            "postfix check, and Postfix will reload if validation succeeds."
+        );
+    }
+</script>
+{% endblock %}

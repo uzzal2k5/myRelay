@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/mail-queue.css">
+
+<a class="mq-back" href="/mail/queue">
+    <i class="bi bi-arrow-left"></i>
+    Back to Mail Queue
+</a>
+
+{% if error %}
+<div class="mq-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if message %}
+<div class="mq-detail-header">
+    <div>
+        <div class="mq-detail-id">{{ message.queue_id }}</div>
+        <span class="mq-status-badge q-{{ message.queue_name }}">{{ message.queue_name }}</span>
+    </div>
+
+    {% if is_editor %}
+    <div class="mq-detail-actions">
+        {% if message.queue_name == "hold" %}
+        <form method="post" action="/mail/queue/{{ message.queue_id }}/release">
+            <button type="submit" class="mq-action-btn"><i class="bi bi-play-fill"></i>Release</button>
+        </form>
+        {% else %}
+        <form method="post" action="/mail/queue/{{ message.queue_id }}/hold">
+            <button type="submit" class="mq-action-btn"><i class="bi bi-pause-fill"></i>Hold</button>
+        </form>
+        {% endif %}
+
+        <form method="post" action="/mail/queue/{{ message.queue_id }}/requeue">
+            <button type="submit" class="mq-action-btn"><i class="bi bi-arrow-repeat"></i>Requeue</button>
+        </form>
+
+        <form method="post" action="/mail/queue/{{ message.queue_id }}/delete"
+              onsubmit="return confirm('Delete this message from the queue? This cannot be undone.');">
+            <button type="submit" class="mq-action-btn is-danger"><i class="bi bi-trash3"></i>Delete</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<div class="mq-panel" style="margin-bottom: 20px;">
+    <div class="mq-detail-grid">
+        <div>
+            <div class="mq-detail-label">Sender</div>
+            <div class="mq-detail-value">{{ message.sender or "—" }}</div>
+        </div>
+        <div>
+            <div class="mq-detail-label">Size</div>
+            <div class="mq-detail-value">{{ (message.size / 1024) | round(1) }} KB</div>
+        </div>
+        <div>
+            <div class="mq-detail-label">Arrived</div>
+            <div class="mq-detail-value">{{ message.arrival_iso[:19] if message.arrival_iso else "—" }}</div>
+        </div>
+        <div>
+            <div class="mq-detail-label">Recipients</div>
+            <div class="mq-detail-value">{{ message.recipient_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="mq-panel" style="margin-bottom: 20px;">
+    <div class="mq-detail-grid" style="grid-template-columns: 1fr;">
+        <div>
+            <div class="mq-detail-label" style="margin-bottom: 10px;">Recipients & Delivery Status</div>
+            {% for r in message.recipients %}
+            <div style="padding: 8px 0; border-bottom: 1px solid var(--mq-border);">
+                <div class="mq-detail-value" style="font-weight: 600;">{{ r.address }}</div>
+                {% if r.delay_reason %}
+                <div class="mq-reason">{{ r.delay_reason }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% if headers %}
+<div class="mq-panel">
+    <div class="mq-detail-label" style="padding: 16px 20px 0;">Message Headers</div>
+    <pre class="mq-headers-block">{{ headers }}</pre>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

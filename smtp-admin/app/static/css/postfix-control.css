@@ -1,0 +1,47 @@
+:root {
+    --pc-border: #e2e8f0;
+    --pc-muted: #64748b;
+    --pc-text: #172033;
+    --pc-bg-subtle: #f8fafc;
+    --pc-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.pc-header { margin-bottom: 20px; }
+.pc-header h2 { margin: 0 0 4px; font-size: 26px; font-weight: 700; color: var(--pc-text); }
+.pc-subtitle { margin: 0; color: var(--pc-muted); font-size: 14px; }
+
+.pc-alert {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+    margin-bottom: 18px; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca;
+    border-left: 3px solid #991b1b; color: #991b1b; font-size: 13px;
+}
+
+.pc-panel { background: #fff; border: 1px solid var(--pc-border); border-radius: 12px; box-shadow: var(--pc-shadow); overflow: hidden; }
+.pc-panel-header {
+    display: flex; align-items: center; justify-content: space-between; padding: 16px 20px;
+    border-bottom: 1px solid var(--pc-border); background: var(--pc-bg-subtle);
+}
+.pc-panel-title { font-weight: 600; font-size: 15px; color: var(--pc-text); }
+.pc-panel-subtitle { font-size: 12px; color: var(--pc-muted); margin-top: 2px; font-family: Consolas, monospace; }
+
+.pc-status {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700;
+}
+.pc-status::before { width: 8px; height: 8px; border-radius: 50%; content: ""; background: #94a3b8; }
+.pc-status.is-running::before { background: #16a34a; }
+.pc-status.is-stopped::before { background: #dc2626; }
+
+.pc-body { padding: 20px; }
+.pc-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pc-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px;
+    border: 1px solid #cbd5e1; background: #fff; color: #1e293b; font-size: 13px; font-weight: 600;
+    cursor: pointer;
+}
+.pc-btn:hover { background: var(--pc-bg-subtle); }
+.pc-btn-primary { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.pc-btn-primary:hover { background: #1a41b8; }
+.pc-btn-danger { border-color: #fecaca; color: #991b1b; }
+.pc-btn-danger:hover { background: #fef2f2; }
+
+.pc-note { margin-top: 16px; font-size: 12.5px; color: var(--pc-muted); }

@@ -1,0 +1,1294 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    :root {
+        --policy-primary: #2563eb;
+        --policy-primary-hover: #1d4ed8;
+        --policy-border: #dbe2ea;
+        --policy-muted: #64748b;
+        --policy-bg: #f8fafc;
+        --policy-success: #15803d;
+        --policy-success-bg: #dcfce7;
+        --policy-danger: #b91c1c;
+        --policy-danger-bg: #fee2e2;
+        --policy-warning: #92400e;
+        --policy-warning-bg: #fef3c7;
+    }
+
+    .smtp-policy-container {
+        width: min(1500px, 100%);
+        margin: 0 auto;
+        padding: 24px;
+        color: #172033;
+    }
+
+    .policy-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .policy-header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        line-height: 1.25;
+    }
+
+    .policy-header p {
+        margin: 0;
+        color: var(--policy-muted);
+        line-height: 1.5;
+    }
+
+    .policy-section {
+        margin-top: 22px;
+        border: 1px solid var(--policy-border);
+        border-radius: 10px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .policy-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--policy-border);
+    }
+
+    .policy-section-header h2 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .policy-section-body {
+        padding: 20px;
+    }
+
+    .policy-subtitle,
+    .readonly-note {
+        color: var(--policy-muted);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .policy-subtitle {
+        margin-top: 4px;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 14px;
+    }
+
+    .status-card {
+        min-width: 0;
+        padding: 17px;
+        border: 1px solid var(--policy-border);
+        border-radius: 9px;
+        background: #fff;
+    }
+
+    .status-label {
+        margin-bottom: 8px;
+        color: var(--policy-muted);
+        font-size: 13px;
+    }
+
+    .status-value {
+        overflow-wrap: anywhere;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .status-ok {
+        color: var(--policy-success);
+    }
+
+    .status-error {
+        color: var(--policy-danger);
+    }
+
+    .status-neutral {
+        color: #334155;
+    }
+
+    .alert {
+        margin-bottom: 18px;
+        padding: 12px 15px;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .alert-success {
+        color: #166534;
+        background: var(--policy-success-bg);
+        border-color: #bbf7d0;
+    }
+
+    .alert-error {
+        color: #991b1b;
+        background: var(--policy-danger-bg);
+        border-color: #fecaca;
+    }
+
+    .alert-warning {
+        color: var(--policy-warning);
+        background: var(--policy-warning-bg);
+        border-color: #fde68a;
+    }
+
+    .policy-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .policy-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 8px 13px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        color: #1e293b;
+        font: inherit;
+        font-size: 13px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .15s ease, border-color .15s ease;
+    }
+
+    .policy-btn:hover {
+        background: #f1f5f9;
+    }
+
+    .policy-btn:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    .policy-btn-primary {
+        color: #fff;
+        background: var(--policy-primary);
+        border-color: var(--policy-primary);
+    }
+
+    .policy-btn-primary:hover {
+        color: #fff;
+        background: var(--policy-primary-hover);
+        border-color: var(--policy-primary-hover);
+    }
+
+    .policy-btn-danger {
+        color: var(--policy-danger);
+        border-color: #fecaca;
+    }
+
+    .policy-btn-danger:hover {
+        background: #fff1f2;
+    }
+
+    .policy-btn-small {
+        min-height: 30px;
+        padding: 5px 9px;
+        font-size: 12px;
+    }
+
+    .service-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .service-status::before {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #94a3b8;
+        content: "";
+    }
+
+    .service-status.is-running::before {
+        background: #16a34a;
+    }
+
+    .service-status.is-stopped::before {
+        background: #dc2626;
+    }
+
+    .service-status.is-unknown::before {
+        background: #d97706;
+    }
+
+    .policy-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .form-row {
+        min-width: 0;
+        margin-bottom: 16px;
+    }
+
+    .form-row label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .form-row input[type="text"],
+    .form-row input[type="number"],
+    .form-row input[type="email"],
+    .form-row select {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 39px;
+        padding: 9px 11px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        color: #172033;
+        font: inherit;
+        font-size: 14px;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus {
+        outline: 2px solid #bfdbfe;
+        border-color: var(--policy-primary);
+    }
+
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 38px;
+    }
+
+    .checkbox-row input {
+        width: 16px;
+        height: 16px;
+    }
+
+    .checkbox-row label {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .policy-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .policy-table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+    }
+
+    .policy-table th,
+    .policy-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .policy-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+
+    .policy-table td {
+        font-size: 13px;
+    }
+
+    .policy-table tbody tr:hover {
+        background: #fafcff;
+    }
+
+    .policy-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .username {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+    }
+
+    .policy-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .policy-badge-enabled {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .policy-badge-disabled {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .usage-cell {
+        min-width: 180px;
+    }
+
+    .usage-row {
+        margin-bottom: 7px;
+    }
+
+    .usage-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .usage-text {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 3px;
+        color: #475569;
+        font-size: 11px;
+    }
+
+    .usage-bar {
+        width: 100%;
+        height: 6px;
+        overflow: hidden;
+        border-radius: 5px;
+        background: #e2e8f0;
+    }
+
+    .usage-bar-inner {
+        height: 100%;
+        border-radius: inherit;
+        background: var(--policy-primary);
+    }
+
+    .usage-bar-inner.is-near-limit {
+        background: #d97706;
+    }
+
+    .usage-bar-inner.is-at-limit {
+        background: #dc2626;
+    }
+
+    .table-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .table-actions form {
+        display: inline;
+        margin: 0;
+    }
+
+    .result-box {
+        margin-top: 16px;
+        padding: 14px;
+        border: 1px solid var(--policy-border);
+        border-radius: 7px;
+        background: #f8fafc;
+    }
+
+    .result-box h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+    }
+
+    .result-box pre {
+        margin: 0;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        inset: 0;
+        overflow-y: auto;
+        padding: 24px 12px;
+        background: rgba(15, 23, 42, .55);
+    }
+
+    .modal.is-open {
+        display: block;
+    }
+
+    .modal-content {
+        width: min(600px, 100%);
+        box-sizing: border-box;
+        margin: 4vh auto;
+        padding: 24px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .modal-close {
+        border: 0;
+        background: transparent;
+        color: #64748b;
+        font-size: 25px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+    }
+
+    .empty-state {
+        padding: 30px 15px !important;
+        color: var(--policy-muted);
+        text-align: center !important;
+    }
+
+    @media (max-width: 700px) {
+        .smtp-policy-container {
+            padding: 14px;
+        }
+
+        .policy-header {
+            display: block;
+        }
+
+        .policy-header h1 {
+            font-size: 24px;
+        }
+
+        .policy-section-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .policy-section-body {
+            padding: 15px;
+        }
+
+        .policy-form-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .modal-content {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="smtp-policy-container">
+
+    <header class="policy-header">
+        <div>
+            <h1>SMTP Policy Management</h1>
+            <p>
+                Manage authenticated SMTP users, message rate limits,
+                policy service health, and policy testing.
+            </p>
+        </div>
+    </header>
+
+    {% if success %}
+    <div class="alert alert-success" role="status">
+        {{ success }}
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-error" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Policy health summary -->
+    <section class="status-grid" aria-label="SMTP policy health">
+        <div class="status-card">
+            <div class="status-label">Policy Service</div>
+            <div class="status-value status-neutral" id="summaryServiceStatus">
+                Checking...
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-label">Policy Listener</div>
+            <div class="status-value status-neutral">127.0.0.1:10031</div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-label">Redis Connection</div>
+            {% if redis_ok %}
+            <div class="status-value status-ok">Connected</div>
+            {% else %}
+            <div class="status-value status-error">Unavailable</div>
+            {% endif %}
+        </div>
+
+        <div class="status-card">
+            <div class="status-label">Redis Database</div>
+            <div class="status-value status-neutral">1</div>
+        </div>
+    </section>
+
+    <!-- Systemd service management -->
+    <section class="policy-section" aria-labelledby="serviceSectionTitle">
+        <div class="policy-section-header">
+            <div>
+                <h2 id="serviceSectionTitle">SMTP Policy Service</h2>
+                <div class="policy-subtitle">
+                    my-relay-smtp-policy.service
+                </div>
+            </div>
+
+            <span id="serviceStatus" class="service-status is-unknown">
+                Checking...
+            </span>
+        </div>
+
+        <div class="policy-section-body">
+            <div class="policy-actions">
+                <button
+                        type="button"
+                        class="policy-btn policy-btn-primary"
+                        data-service-action="start"
+                        onclick="serviceAction('start')">
+                    Start
+                </button>
+
+                <button
+                        type="button"
+                        class="policy-btn"
+                        data-service-action="stop"
+                        onclick="serviceAction('stop')">
+                    Stop
+                </button>
+
+                <button
+                        type="button"
+                        class="policy-btn"
+                        data-service-action="restart"
+                        onclick="serviceAction('restart')">
+                    Restart
+                </button>
+
+                <button
+                        type="button"
+                        class="policy-btn"
+                        data-service-action="enable"
+                        onclick="serviceAction('enable')">
+                    Enable at Boot
+                </button>
+
+                <button
+                        type="button"
+                        class="policy-btn"
+                        id="refreshServiceButton"
+                        onclick="refreshServiceStatus()">
+                    Refresh Status
+                </button>
+            </div>
+
+            <p class="readonly-note" style="margin: 14px 0 0;">
+                Service actions require authorized access. Stop and restart
+                operations may interrupt SMTP policy enforcement.
+            </p>
+
+            <div id="serviceMessage" class="alert" role="status" hidden></div>
+        </div>
+    </section>
+
+    <!-- Policy test tools -->
+    <section class="policy-section" aria-labelledby="testSectionTitle">
+        <div class="policy-section-header">
+            <div>
+                <h2 id="testSectionTitle">Test SMTP Policy</h2>
+                <div class="policy-subtitle">
+                    Simulation is read-only. A live listener test may update
+                    the selected user's rate counters.
+                </div>
+            </div>
+        </div>
+
+        <div class="policy-section-body">
+            <form id="policyTestForm">
+                <div class="form-row">
+                    <label for="testUsername">SMTP AUTH Username</label>
+                    <input
+                            id="testUsername"
+                            name="username"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="svc_automa_smtp@muktopay.com"
+                            required>
+                </div>
+
+                <div class="policy-actions">
+                    <button
+                            type="button"
+                            class="policy-btn policy-btn-primary"
+                            onclick="runPolicyTest('simulate')">
+                        Simulate Policy
+                    </button>
+
+                    <button
+                            type="button"
+                            class="policy-btn"
+                            onclick="runPolicyTest('live')">
+                        Live Listener Test
+                    </button>
+                </div>
+            </form>
+
+            <div class="result-box" id="policyTestResultBox" hidden>
+                <h3>Test Result</h3>
+                <pre id="policyTestResult"></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- SMTP policy users -->
+    <section class="policy-section" aria-labelledby="usersSectionTitle">
+        <div class="policy-section-header">
+            <div>
+                <h2 id="usersSectionTitle">SMTP Policy Users</h2>
+                <div class="policy-subtitle">
+                    Limits are enforced through Redis counters.
+                </div>
+            </div>
+
+            <button
+                    type="button"
+                    class="policy-btn policy-btn-primary"
+                    onclick="openPolicyModal()">
+                + Add SMTP User
+            </button>
+        </div>
+
+        <div class="policy-table-wrapper">
+            <table class="policy-table">
+                <thead>
+                <tr>
+                    <th scope="col">SMTP User</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Minute Limit</th>
+                    <th scope="col">Hour Limit</th>
+                    <th scope="col">Day Limit</th>
+                    <th scope="col">Current Usage</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for user in users %}
+                {% set current_usage = usage.get(user.username) %}
+
+                <tr>
+                    <td class="username">
+                        {{ user.username }}
+                    </td>
+
+                    <td>
+                        {% if user.enabled %}
+                        <span class="policy-badge policy-badge-enabled">
+                                        Enabled
+                                    </span>
+                        {% else %}
+                        <span class="policy-badge policy-badge-disabled">
+                                        Disabled
+                                    </span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ user.minute_limit }}</td>
+                    <td>{{ user.hour_limit }}</td>
+                    <td>{{ user.day_limit }}</td>
+
+                    <td class="usage-cell">
+                        {% if current_usage %}
+                        {% for period, label in [
+                        ('minute', 'Minute'),
+                        ('hour', 'Hour'),
+                        ('day', 'Day')
+                        ] %}
+                        {% set period_usage = current_usage[period] %}
+                        {% set limit_value = period_usage.limit | int %}
+                        {% set used_value = period_usage.used | int %}
+                        {% if limit_value > 0 %}
+                        {% set percent = ((used_value * 100) / limit_value) | int %}
+                        {% else %}
+                        {% set percent = 0 %}
+                        {% endif %}
+
+                        <div class="usage-row">
+                            <div class="usage-text">
+                                <span>{{ label }}</span>
+                                <span>
+                                                    {{ used_value }} / {{ limit_value }}
+                                                </span>
+                            </div>
+
+                            <div class="usage-bar">
+                                <div
+                                        class="usage-bar-inner
+                                                        {% if percent >= 100 %}is-at-limit
+                                                        {% elif percent >= 80 %}is-near-limit
+                                                        {% endif %}"
+                                        style="width: {{ [percent, 100] | min }}%;">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <span class="readonly-note">N/A</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="table-actions">
+                            <button
+                                    type="button"
+                                    class="policy-btn policy-btn-small"
+                                    data-username="{{ user.username }}"
+                                    data-enabled="{{ 'true' if user.enabled else 'false' }}"
+                                    data-minute="{{ user.minute_limit }}"
+                                    data-hour="{{ user.hour_limit }}"
+                                    data-day="{{ user.day_limit }}"
+                                    onclick="editPolicyFromButton(this)">
+                                Edit
+                            </button>
+
+                            <form
+                                    method="post"
+                                    action="/smtp/policy/delete"
+                                    onsubmit="return confirmDeletePolicy(this);">
+                                <input
+                                        type="hidden"
+                                        name="username"
+                                        value="{{ user.username }}">
+
+                                <button
+                                        type="submit"
+                                        class="policy-btn policy-btn-small policy-btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+
+                            <a
+                                    class="policy-btn policy-btn-small"
+                                    href="/smtp/policy/usage/{{ user.username }}">
+                                Usage
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        No SMTP policy users configured.
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<!-- Add/Edit policy modal -->
+<div
+        id="policyModal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="policyModalTitle"
+        aria-hidden="true">
+
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2 id="policyModalTitle">SMTP Policy Configuration</h2>
+                <p class="policy-subtitle">
+                    Configure the authenticated SMTP user's policy limits.
+                </p>
+            </div>
+
+            <button
+                    type="button"
+                    class="modal-close"
+                    aria-label="Close dialog"
+                    onclick="closePolicyModal()">
+                &times;
+            </button>
+        </div>
+
+        <form
+                id="policyConfigForm"
+                method="post"
+                action="/smtp/policy/save"
+                onsubmit="return validatePolicyForm();">
+
+            <div class="form-row">
+                <label for="username">SMTP Username</label>
+                <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="svc_application@muktopay.com"
+                        autocomplete="off"
+                        required>
+                <div class="readonly-note" style="margin-top: 5px;">
+                    Use the SMTP AUTH username configured for this service.
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="checkbox-row">
+                    <input
+                            type="checkbox"
+                            id="enabled"
+                            name="enabled"
+                            value="1"
+                            checked>
+                    <label for="enabled">Policy enabled</label>
+                </div>
+            </div>
+
+            <div class="policy-form-grid">
+                <div class="form-row">
+                    <label for="minute_limit">Messages per Minute</label>
+                    <input
+                            type="number"
+                            id="minute_limit"
+                            name="minute_limit"
+                            min="1"
+                            step="1"
+                            required>
+                </div>
+
+                <div class="form-row">
+                    <label for="hour_limit">Messages per Hour</label>
+                    <input
+                            type="number"
+                            id="hour_limit"
+                            name="hour_limit"
+                            min="1"
+                            step="1"
+                            required>
+                </div>
+
+                <div class="form-row">
+                    <label for="day_limit">Messages per Day</label>
+                    <input
+                            type="number"
+                            id="day_limit"
+                            name="day_limit"
+                            min="1"
+                            step="1"
+                            required>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" style="margin-top: 4px;">
+                Ensure the minute limit does not exceed the hour limit,
+                and the hour limit does not exceed the day limit.
+            </div>
+
+            <div class="form-actions">
+                <button
+                        type="button"
+                        class="policy-btn"
+                        onclick="closePolicyModal()">
+                    Cancel
+                </button>
+
+                <button
+                        type="submit"
+                        class="policy-btn policy-btn-primary">
+                    Save Policy
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    const POLICY_SERVICE_BASE = "/smtp/policy/service";
+    const POLICY_TEST_BASE = "/smtp/policy/test";
+
+    function setMessage(element, message, type = "") {
+        if (!element) return;
+
+        element.textContent = message;
+        element.hidden = !message;
+        element.className = "alert";
+
+        if (type === "success") {
+            element.classList.add("alert-success");
+        } else if (type === "error") {
+            element.classList.add("alert-error");
+        } else if (type === "warning") {
+            element.classList.add("alert-warning");
+        }
+    }
+
+    async function readResponse(response) {
+        let data = {};
+
+        try {
+            data = await response.json();
+        } catch (_) {
+            data = {};
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail ||
+                data.message ||
+                `Request failed with HTTP ${response.status}`
+            );
+        }
+
+        return data;
+    }
+
+    function setServiceStatus(active, enabled) {
+        const statusElement = document.getElementById("serviceStatus");
+        const summaryElement = document.getElementById("summaryServiceStatus");
+
+        const activeText = active || "unknown";
+        const enabledText = enabled || "unknown";
+
+        statusElement.className = "service-status";
+
+        if (String(active).toLowerCase() === "active") {
+            statusElement.classList.add("is-running");
+        } else if (String(active).toLowerCase() === "inactive") {
+            statusElement.classList.add("is-stopped");
+        } else {
+            statusElement.classList.add("is-unknown");
+        }
+
+        statusElement.textContent = `${activeText} / ${enabledText}`;
+        summaryElement.textContent = activeText;
+        summaryElement.className = "status-value";
+
+        if (String(active).toLowerCase() === "active") {
+            summaryElement.classList.add("status-ok");
+        } else if (String(active).toLowerCase() === "inactive") {
+            summaryElement.classList.add("status-error");
+        } else {
+            summaryElement.classList.add("status-neutral");
+        }
+    }
+
+    async function refreshServiceStatus() {
+        const statusElement = document.getElementById("serviceStatus");
+        const summaryElement = document.getElementById("summaryServiceStatus");
+        const messageElement = document.getElementById("serviceMessage");
+        const refreshButton = document.getElementById("refreshServiceButton");
+
+        statusElement.textContent = "Checking...";
+        summaryElement.textContent = "Checking...";
+        statusElement.className = "service-status is-unknown";
+        setMessage(messageElement, "");
+
+        refreshButton.disabled = true;
+
+        try {
+            const response = await fetch(`${POLICY_SERVICE_BASE}/status`, {
+                method: "GET",
+                headers: { "Accept": "application/json" },
+                credentials: "same-origin"
+            });
+
+            const data = await readResponse(response);
+
+            setServiceStatus(data.active, data.enabled);
+        } catch (error) {
+            statusElement.textContent = "Status unavailable";
+            summaryElement.textContent = "Unavailable";
+            summaryElement.className = "status-value status-error";
+            statusElement.className = "service-status is-unknown";
+
+            setMessage(messageElement, error.message, "error");
+        } finally {
+            refreshButton.disabled = false;
+        }
+    }
+
+    async function serviceAction(action) {
+        const allowedActions = ["start", "stop", "restart", "enable"];
+
+        if (!allowedActions.includes(action)) {
+            return;
+        }
+
+        if (["stop", "restart"].includes(action)) {
+            const confirmed = confirm(
+                `Are you sure you want to ${action} the SMTP policy service? ` +
+                "This may temporarily interrupt SMTP policy enforcement."
+            );
+
+            if (!confirmed) return;
+        }
+
+        const messageElement = document.getElementById("serviceMessage");
+        const actionButtons = document.querySelectorAll("[data-service-action]");
+
+        actionButtons.forEach(button => button.disabled = true);
+        setMessage(messageElement, `${action} requested...`);
+
+        try {
+            const response = await fetch(
+                `${POLICY_SERVICE_BASE}/${encodeURIComponent(action)}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    credentials: "same-origin"
+                }
+            );
+
+            const data = await readResponse(response);
+
+            const activeStatus =
+                data.status && data.status.active
+                    ? data.status.active
+                    : "unknown";
+
+            setMessage(
+                messageElement,
+                `Action "${action}" completed. Service status: ${activeStatus}.`,
+                "success"
+            );
+
+            await refreshServiceStatus();
+        } catch (error) {
+            setMessage(messageElement, error.message, "error");
+        } finally {
+            actionButtons.forEach(button => button.disabled = false);
+        }
+    }
+
+    async function runPolicyTest(testType) {
+        if (!["simulate", "live"].includes(testType)) {
+            return;
+        }
+
+        const username = document.getElementById("testUsername").value.trim();
+        const resultBox = document.getElementById("policyTestResultBox");
+        const resultElement = document.getElementById("policyTestResult");
+
+        if (!username) {
+            resultBox.hidden = false;
+            resultElement.textContent = "Enter an SMTP AUTH username.";
+            return;
+        }
+
+        if (testType === "live") {
+            const confirmed = confirm(
+                "A live listener test may increment the selected user's " +
+                "rate counters. Continue?"
+            );
+
+            if (!confirmed) return;
+        }
+
+        const formData = new FormData();
+        formData.append("username", username);
+
+        resultBox.hidden = false;
+        resultElement.textContent = "Running test...";
+
+        try {
+            const response = await fetch(
+                `${POLICY_TEST_BASE}/${encodeURIComponent(testType)}`,
+                {
+                    method: "POST",
+                    body: formData,
+                    headers: { "Accept": "application/json" },
+                    credentials: "same-origin"
+                }
+            );
+
+            const data = await readResponse(response);
+            resultElement.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            resultElement.textContent = error.message;
+        }
+    }
+
+    function openPolicyModal() {
+        const modal = document.getElementById("policyModal");
+        const form = document.getElementById("policyConfigForm");
+
+        form.reset();
+
+        document.getElementById("policyModalTitle").textContent =
+            "Add SMTP Policy User";
+
+        document.getElementById("username").readOnly = false;
+        document.getElementById("username").value = "";
+        document.getElementById("enabled").checked = true;
+        document.getElementById("minute_limit").value = 10;
+        document.getElementById("hour_limit").value = 100;
+        document.getElementById("day_limit").value = 500;
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+
+        document.getElementById("username").focus();
+    }
+
+    function editPolicyFromButton(button) {
+        const username = button.dataset.username || "";
+        const enabled = button.dataset.enabled === "true";
+        const minute = button.dataset.minute || "10";
+        const hour = button.dataset.hour || "100";
+        const day = button.dataset.day || "500";
+
+        editPolicy(username, enabled, minute, hour, day);
+    }
+
+    function editPolicy(username, enabled, minute, hour, day) {
+        const modal = document.getElementById("policyModal");
+
+        document.getElementById("policyModalTitle").textContent =
+            "Edit SMTP Policy User";
+
+        document.getElementById("username").value = username;
+        document.getElementById("username").readOnly = true;
+        document.getElementById("enabled").checked = Boolean(enabled);
+        document.getElementById("minute_limit").value = minute;
+        document.getElementById("hour_limit").value = hour;
+        document.getElementById("day_limit").value = day;
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+
+        document.getElementById("minute_limit").focus();
+    }
+
+    function closePolicyModal() {
+        const modal = document.getElementById("policyModal");
+
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    function validatePolicyForm() {
+        const minute = Number(
+            document.getElementById("minute_limit").value
+        );
+        const hour = Number(
+            document.getElementById("hour_limit").value
+        );
+        const day = Number(
+            document.getElementById("day_limit").value
+        );
+
+        if (
+            !Number.isInteger(minute) ||
+            !Number.isInteger(hour) ||
+            !Number.isInteger(day) ||
+            minute < 1 ||
+            hour < 1 ||
+            day < 1
+        ) {
+            alert("All rate limits must be positive whole numbers.");
+            return false;
+        }
+
+        if (minute > hour) {
+            alert("Messages per minute must not exceed messages per hour.");
+            return false;
+        }
+
+        if (hour > day) {
+            alert("Messages per hour must not exceed messages per day.");
+            return false;
+        }
+
+        return true;
+    }
+
+    function confirmDeletePolicy(form) {
+        const username = form.querySelector(
+            'input[name="username"]'
+        ).value;
+
+        return confirm(
+            `Delete the SMTP policy for "${username}"?`
+        );
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        refreshServiceStatus();
+
+        const modal = document.getElementById("policyModal");
+
+        modal.addEventListener("click", event => {
+            if (event.target === modal) {
+                closePolicyModal();
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && modal.classList.contains("is-open")) {
+                closePolicyModal();
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+[Unit]
+Description=SMTP Python Redis Policy Service
+After=network-online.target redis.service
+Wants=network-online.target
+Requires=redis.service
+
+[Service]
+Type=simple
+
+User=root
+Group=root
+
+ExecStart=/usr/bin/python3 \
+          /etc/postfix/smtp-policy/smtp_policy.py
+
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+
+ProtectSystem=full
+
+ReadWritePaths=/var/log
+
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

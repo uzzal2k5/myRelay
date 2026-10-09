@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/account-security.css">
+
+<div class="as-container">
+
+    <div class="as-header">
+        <h2>Account Security</h2>
+        <p class="as-subtitle">Session details and recent sign-in activity for your account.</p>
+    </div>
+
+    {% if error %}
+    <div class="as-panel">
+        <div class="as-note"><i class="bi bi-exclamation-triangle-fill"></i><span>{{ error }}</span></div>
+    </div>
+    {% endif %}
+
+    <div class="as-panel">
+        <div class="as-panel-header">
+            <i class="bi bi-person-check"></i>
+            Current session
+        </div>
+
+        <div class="as-grid">
+            <div class="as-field">
+                <div class="as-field-label">Signed in as</div>
+                <div class="as-field-value">{{ username }}</div>
+            </div>
+
+            <div class="as-field">
+                <div class="as-field-label">Portal role</div>
+                <div class="as-field-value">{{ role | replace("_", " ") | title }}</div>
+            </div>
+
+            <div class="as-field">
+                <div class="as-field-label">Session started</div>
+                <div class="as-field-value">{{ session_duration }}</div>
+            </div>
+
+            <div class="as-field">
+                <div class="as-field-label">Idle session timeout</div>
+                <div class="as-field-value">{{ session_timeout_minutes }} minutes</div>
+            </div>
+        </div>
+
+        <div class="as-note">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>
+                Password changes are not handled here. Your username and password are managed
+                through Active Directory by your IT department.
+            </span>
+        </div>
+
+        <div style="padding: 0 20px 20px;">
+            <form method="post" action="/logout">
+                <button type="submit" class="as-end-session">
+                    <i class="bi bi-box-arrow-right"></i>
+                    End this session
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="as-panel">
+        <div class="as-panel-header">
+            <i class="bi bi-shield-lock"></i>
+            Authentication connection
+        </div>
+
+        <div class="as-grid">
+            <div class="as-field">
+                <div class="as-field-label">Connection to Active Directory</div>
+                <div class="as-field-value">
+                    <span class="as-pill {{ 'is-ok' if connection_secure else 'is-warn' }}">
+                        <i class="bi {{ 'bi-lock-fill' if connection_secure else 'bi-unlock-fill' }}"></i>
+                        {{ connection_transport }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="as-field">
+                <div class="as-field-label">Certificate verification</div>
+                <div class="as-field-value">
+                    <span class="as-pill {{ 'is-ok' if cert_verified else 'is-warn' }}">
+                        {{ "Verified" if cert_verified else "Not verified" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="as-panel">
+        <div class="as-panel-header">
+            <i class="bi bi-clock-history"></i>
+            Recent sign-in activity
+        </div>
+
+        {% if own_events %}
+        {% for e in own_events %}
+        {% set result = (e.result or "") | upper %}
+        {% set action = (e.action or "") | upper %}
+        <div class="as-event-row">
+            <div class="as-event-icon {{ 'is-failed' if result == 'FAILED' else 'is-login' if action == 'LOGIN' else 'is-logout' }}">
+                <i class="bi {{ 'bi-x-lg' if result == 'FAILED' else 'bi-box-arrow-in-right' if action == 'LOGIN' else 'bi-box-arrow-right' }}"></i>
+            </div>
+            <div>
+                <div class="as-event-action">
+                    {{ action | title }}{% if result == "FAILED" %} failed{% endif %}
+                </div>
+                <div class="as-event-time">{{ e.timestamp or "—" }}</div>
+            </div>
+            <span class="as-event-ip">{{ e.source_ip or "—" }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="as-events-empty">No sign-in activity recorded yet for this account.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

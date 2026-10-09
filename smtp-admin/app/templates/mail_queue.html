@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/mail-queue.css">
+
+<div class="mq-header">
+    <div>
+        <h2>Mail Queue Management</h2>
+        <p class="mq-subtitle">View and manage messages in the Postfix mail queue.</p>
+    </div>
+
+    {% if is_editor %}
+    <form method="post" action="/mail/queue/flush">
+        <button type="submit" class="mq-flush-btn" onclick="return confirm('Attempt delivery of all queued mail now?');">
+            <i class="bi bi-lightning-charge-fill"></i>
+            Flush Queue
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% if error %}
+<div class="mq-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="mq-summary-grid">
+    <a class="mq-summary-tile {{ 'is-selected' if selected_queue == 'all' }}" href="/mail/queue?queue=all">
+        <div class="mq-summary-label">Total</div>
+        <div class="mq-summary-value">{{ counts.total }}</div>
+    </a>
+    <a class="mq-summary-tile {{ 'is-selected' if selected_queue == 'active' }}" href="/mail/queue?queue=active">
+        <div class="mq-summary-label">Active</div>
+        <div class="mq-summary-value">{{ counts.active }}</div>
+    </a>
+    <a class="mq-summary-tile {{ 'is-selected' if selected_queue == 'deferred' }}" href="/mail/queue?queue=deferred">
+        <div class="mq-summary-label">Deferred</div>
+        <div class="mq-summary-value">{{ counts.deferred }}</div>
+    </a>
+    <a class="mq-summary-tile {{ 'is-selected' if selected_queue == 'hold' }}" href="/mail/queue?queue=hold">
+        <div class="mq-summary-label">Hold</div>
+        <div class="mq-summary-value">{{ counts.hold }}</div>
+    </a>
+    <a class="mq-summary-tile {{ 'is-selected' if selected_queue == 'incoming' }}" href="/mail/queue?queue=incoming">
+        <div class="mq-summary-label">Incoming</div>
+        <div class="mq-summary-value">{{ counts.incoming }}</div>
+    </a>
+    <a class="mq-summary-tile {{ 'is-selected' if selected_queue == 'corrupt' }}" href="/mail/queue?queue=corrupt">
+        <div class="mq-summary-label">Corrupt</div>
+        <div class="mq-summary-value">{{ counts.corrupt }}</div>
+    </a>
+</div>
+
+<form method="get" action="/mail/queue" class="mq-toolbar">
+    <input type="hidden" name="queue" value="{{ selected_queue }}">
+    <input
+            type="text"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Filter by sender, recipient, or queue ID...">
+    <button type="submit">Filter</button>
+</form>
+
+{% if is_editor and selected_queue in ('deferred', 'hold', 'corrupt') and messages %}
+<form method="post" action="/mail/queue/clear" style="margin-bottom: 16px;"
+      onsubmit="return confirm('Delete ALL {{ selected_queue }} messages? This cannot be undone.');">
+    <input type="hidden" name="queue_name" value="{{ selected_queue }}">
+    <button type="submit" class="mq-row-btn is-danger">
+        <i class="bi bi-trash3"></i>
+        Clear entire {{ selected_queue }} queue
+    </button>
+</form>
+{% endif %}
+
+<div class="mq-panel">
+    {% if messages %}
+    <div class="mq-table-wrapper">
+        <table class="mq-table">
+            <thead>
+            <tr>
+                <th scope="col">Queue ID</th>
+                <th scope="col">Status</th>
+                <th scope="col">Size</th>
+                <th scope="col">Arrived</th>
+                <th scope="col">Sender</th>
+                <th scope="col">Recipients</th>
+                {% if is_editor %}
+                <th scope="col">Actions</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for msg in messages %}
+            <tr>
+                <td><a class="mq-id-link" href="/mail/queue/{{ msg.queue_id }}">{{ msg.queue_id }}</a></td>
+                <td><span class="mq-status-badge q-{{ msg.queue_name }}">{{ msg.queue_name }}</span></td>
+                <td>{{ (msg.size / 1024) | round(1) }} KB</td>
+                <td>{{ msg.arrival_iso[:19] if msg.arrival_iso else "—" }}</td>
+                <td class="mq-sender">{{ msg.sender or "—" }}</td>
+                <td class="mq-recipients">
+                    {% for r in msg.recipients[:2] %}
+                    {{ r.address }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                    {% if msg.recipient_count > 2 %}
+                    <span class="mq-more">+{{ msg.recipient_count - 2 }} more</span>
+                    {% endif %}
+                    {% if msg.delay_reasons %}
+                    <div class="mq-reason">{{ msg.delay_reasons[0] }}</div>
+                    {% endif %}
+                </td>
+                {% if is_editor %}
+                <td>
+                    <div class="mq-row-actions">
+                        {% if msg.queue_name == "hold" %}
+                        <form method="post" action="/mail/queue/{{ msg.queue_id }}/release">
+                            <button type="submit" class="mq-row-btn"><i class="bi bi-play-fill"></i>Release</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="/mail/queue/{{ msg.queue_id }}/hold">
+                            <button type="submit" class="mq-row-btn"><i class="bi bi-pause-fill"></i>Hold</button>
+                        </form>
+                        {% endif %}
+
+                        <form method="post" action="/mail/queue/{{ msg.queue_id }}/delete"
+                              onsubmit="return confirm('Delete this message from the queue? This cannot be undone.');">
+                            <button type="submit" class="mq-row-btn is-danger"><i class="bi bi-trash3"></i>Delete</button>
+                        </form>
+                    </div>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="mq-empty">No messages in this queue.</div>
+    {% endif %}
+</div>
+{% endblock %}

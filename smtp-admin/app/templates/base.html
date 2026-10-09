@@ -1,0 +1,98 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ title or "My Relay" }}</title>
+    <!-- Base CSS -->
+    <link
+            href="{{ url_for('static', path='css/base.css') }}"
+            rel="stylesheet">
+
+    <script
+            src="{{ url_for('static', path='vendor/bootstrap/htmx.min.js') }}"
+    ></script>
+
+
+    <!-- Bootstrap CSS -->
+    <link
+            rel="stylesheet"
+            href="{{ url_for('static', path='vendor/bootstrap/bootstrap.min.css') }}"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+            rel="stylesheet"
+            href="{{ url_for('static', path='vendor/bootstrap/bootstrap-icons.min.css') }}"
+    >
+
+    <!-- Custom CSS -->
+    <link
+            href="{{ url_for('static', path='css/style.css') }}"
+            rel="stylesheet">
+
+
+    <script
+            src="{{ url_for('static', path='vendor/bootstrap/bootstrap.bundle.min.js') }}"
+    ></script>
+
+    <link
+            href="{{ url_for('static', path='css/sidebar.css') }}"
+            rel="stylesheet">
+</head>
+
+<body>
+
+
+<!-- Top Navigation -->
+{% include "partials/topnav.html" %}
+
+<!-- Main Application Layout -->
+<div class="relay-layout">
+
+    <!-- Left Sidebar -->
+    {% include "partials/sidebar.html" %}
+
+    <!-- Main Content -->
+    <main class="relay-main-content">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+</div>
+
+<nav class="navbar navbar-dark relay-navbar">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center gap-3">
+            {% if request.session.get("username") %}
+            <button
+                    class="btn btn-outline-light btn-sm d-md-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#relaySidebar"
+                    aria-controls="relaySidebar"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+            >
+                Menu
+            </button>
+            {% endif %}
+
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+
+            <a class="btn  btn-sm" style="border: none; color: #808080;" href="/pipaops">
+                Developed By PipaOps&copy;2027
+            </a>
+        </div>
+
+    </div>
+</nav>
+
+</body>
+</html>

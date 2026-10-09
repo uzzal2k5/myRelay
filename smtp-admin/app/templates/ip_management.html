@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/ip-management.css">
+
+<div class="ipm-header">
+    <h2>IP Management</h2>
+    <p class="ipm-subtitle">Control which IP addresses and networks may relay, and which are blocked outright.</p>
+</div>
+
+{% if success %}
+<div class="notice notice-success">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>{{ success }}</span>
+</div>
+{% endif %}
+
+{% if error %}
+<div class="notice notice-error">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<!-- ================= ALLOWED IP ================= -->
+
+<div class="policy-section">
+
+    <div class="policy-header" onclick="togglePolicy(this)">
+        <div class="policy-header-left">
+            <div class="policy-icon is-allow"><i class="bi bi-check-circle"></i></div>
+            <div class="policy-title">
+                <strong>Allowed IP Addresses</strong>
+                <small>/etc/postfix/ip-management/allowed_ips</small>
+            </div>
+        </div>
+
+        <div class="policy-header-right">
+            <span class="policy-count is-allow">{{ policies.allowed|length }}</span>
+            <span class="policy-arrow"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+
+    <div class="policy-content">
+
+        <form method="post"
+              action="/ip/mgmt/allowed"
+              onsubmit="preparePolicySubmit('allowed')">
+
+            <div class="policy-columns">
+
+                <div class="policy-box">
+                    <label for="allowed-input">New IP Address</label>
+
+                    <textarea
+                            id="allowed-input"
+                            placeholder="Enter IP address&#10;Example: 172.17.65.36"></textarea>
+                </div>
+
+                <div class="policy-actions">
+                    <button type="button" onclick="addPolicy('allowed')" title="Add">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <button type="button" onclick="removePolicy('allowed')" title="Remove">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                </div>
+
+                <div class="policy-box">
+                    <label for="allowed-enabled">Enabled IP Addresses</label>
+
+                    <select id="allowed-enabled" name="addresses" multiple>
+                        {% for entry in policies.allowed %}
+                        <option value="{{ entry.address }}">{{ entry.address }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="apply-button">
+                <i class="bi bi-save"></i>
+                Apply Changes
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<!-- ================= DENIED IP ================= -->
+
+<div class="policy-section">
+
+    <div class="policy-header" onclick="togglePolicy(this)">
+        <div class="policy-header-left">
+            <div class="policy-icon is-deny"><i class="bi bi-slash-circle"></i></div>
+            <div class="policy-title">
+                <strong>Denied IP Addresses</strong>
+                <small>/etc/postfix/ip-management/denied_ips</small>
+            </div>
+        </div>
+
+        <div class="policy-header-right">
+            <span class="policy-count is-deny">{{ policies.denied|length }}</span>
+            <span class="policy-arrow"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+
+    <div class="policy-content">
+
+        <form method="post"
+              action="/ip/mgmt/denied"
+              onsubmit="preparePolicySubmit('denied')">
+
+            <div class="policy-columns">
+
+                <div class="policy-box">
+                    <label for="denied-input">New IP Address</label>
+
+                    <textarea
+                            id="denied-input"
+                            placeholder="Enter IP address&#10;Example: 172.17.65.100"></textarea>
+                </div>
+
+                <div class="policy-actions">
+                    <button type="button" onclick="addPolicy('denied')" title="Add">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <button type="button" onclick="removePolicy('denied')" title="Remove">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                </div>
+
+                <div class="policy-box">
+                    <label for="denied-enabled">Enabled IP Addresses</label>
+
+                    <select id="denied-enabled" name="addresses" multiple>
+                        {% for entry in policies.denied %}
+                        <option value="{{ entry.address }}">{{ entry.address }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="apply-button">
+                <i class="bi bi-save"></i>
+                Apply Changes
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<!-- ================= BLOCKED IP / NETWORK ================= -->
+
+<div class="policy-section">
+
+    <div class="policy-header" onclick="togglePolicy(this)">
+        <div class="policy-header-left">
+            <div class="policy-icon is-block"><i class="bi bi-shield-exclamation"></i></div>
+            <div class="policy-title">
+                <strong>Blocked IP / Network</strong>
+                <small>/etc/postfix/ip-management/blocked_ips</small>
+            </div>
+        </div>
+
+        <div class="policy-header-right">
+            <span class="policy-count is-block">{{ policies.blocked|length }}</span>
+            <span class="policy-arrow"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+
+    <div class="policy-content">
+
+        <form method="post"
+              action="/ip/mgmt/blocked"
+              onsubmit="preparePolicySubmit('blocked')">
+
+            <div class="policy-columns">
+
+                <div class="policy-box">
+                    <label for="blocked-input">New IP / Network</label>
+
+                    <textarea
+                            id="blocked-input"
+                            placeholder="Enter IP or network&#10;Example: 192.168.10.50&#10;Example: 10.10.20.0/24"></textarea>
+                </div>
+
+                <div class="policy-actions">
+                    <button type="button" onclick="addPolicy('blocked')" title="Add">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <button type="button" onclick="removePolicy('blocked')" title="Remove">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                </div>
+
+                <div class="policy-box">
+                    <label for="blocked-enabled">Enabled IP / Networks</label>
+
+                    <select id="blocked-enabled" name="addresses" multiple>
+                        {% for entry in policies.blocked %}
+                        <option value="{{ entry.address }}">{{ entry.address }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="apply-button">
+                <i class="bi bi-save"></i>
+                Apply Changes
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+
+    function togglePolicy(header) {
+        const section = header.closest(".policy-section");
+        section.classList.toggle("open");
+    }
+
+
+    function addPolicy(policy) {
+        const input = document.getElementById(policy + "-input");
+        const select = document.getElementById(policy + "-enabled");
+
+        const values = input.value
+            .split(/\r?\n/)
+            .map(v => v.trim())
+            .filter(v => v !== "");
+
+        values.forEach(value => {
+            let exists = false;
+
+            for (const option of select.options) {
+                if (option.value === value) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists) {
+                const option = new Option(value, value);
+                select.add(option);
+            }
+        });
+
+        input.value = "";
+        updatePolicyCount(policy);
+    }
+
+
+    function removePolicy(policy) {
+        const select = document.getElementById(policy + "-enabled");
+
+        Array.from(select.selectedOptions).forEach(option => {
+            option.remove();
+        });
+
+        updatePolicyCount(policy);
+    }
+
+
+    function updatePolicyCount(policy) {
+        const select = document.getElementById(policy + "-enabled");
+        const section = select.closest(".policy-section");
+        const countBadge = section.querySelector(".policy-count");
+
+        if (countBadge) {
+            countBadge.textContent = select.options.length;
+        }
+    }
+
+
+    function preparePolicySubmit(policy) {
+        const select = document.getElementById(policy + "-enabled");
+
+        /*
+         * HTML does not submit unselected <option> elements
+         * from a multiple select.
+         *
+         * Select everything before submitting so the backend
+         * receives the complete desired state.
+         */
+        Array.from(select.options).forEach(option => {
+            option.selected = true;
+        });
+    }
+
+</script>
+
+{% endblock %}

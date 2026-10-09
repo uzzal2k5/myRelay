@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euo pipefail
+
+SERVICE="smtp-policy.service"
+ACTION="${1:-}"
+
+case "$ACTION" in
+    status)
+        systemctl is-active "$SERVICE" || true
+        ;;
+    enabled)
+        systemctl is-enabled "$SERVICE" || true
+        ;;
+    start)
+        systemctl start "$SERVICE"
+        ;;
+    stop)
+        systemctl stop "$SERVICE"
+        ;;
+    restart)
+        systemctl restart "$SERVICE"
+        ;;
+    enable)
+        systemctl enable "$SERVICE"
+        ;;
+    *)
+        echo "Unsupported action" >&2
+        exit 2
+        ;;
+esac

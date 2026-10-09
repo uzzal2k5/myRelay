@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/redis-data.css">
+
+<div class="rdb-header">
+    <h2>Redis Data Browser</h2>
+    <p class="rdb-subtitle">Browse keys in the Redis keyspace. Reads only scan a limited batch at a time.</p>
+</div>
+
+{% if error %}
+<div class="rdb-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<form method="get" action="/redis/data" class="rdb-search-form">
+    <input
+            type="text"
+            name="pattern"
+            value="{{ pattern }}"
+            placeholder="Key pattern, e.g. smtp:policy:* or *"
+            spellcheck="false">
+    <button type="submit" class="rdb-search-btn">
+        <i class="bi bi-search"></i>
+        Scan
+    </button>
+</form>
+
+<div class="rdb-panel">
+    {% if entries %}
+    <div class="rdb-table-wrapper">
+        <table class="rdb-table">
+            <thead>
+            <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Type</th>
+                <th scope="col">TTL</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td>
+                    <a class="rdb-key-link" href="/redis/data/key?key={{ entry.key|urlencode }}&pattern={{ pattern|urlencode }}&cursor={{ cursor }}">
+                        {{ entry.key }}
+                    </a>
+                </td>
+                <td>
+                    <span class="rdb-type-badge type-{{ entry.type }}">{{ entry.type }}</span>
+                </td>
+                <td class="rdb-ttl">
+                    {% if entry.ttl is none or entry.ttl == -2 %}
+                    —
+                    {% elif entry.ttl == -1 %}
+                    No expiry
+                    {% else %}
+                    {{ entry.ttl }}s
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if has_more %}
+    <div class="rdb-load-more">
+        <a class="rdb-load-more-btn" href="/redis/data?pattern={{ pattern|urlencode }}&cursor={{ next_cursor }}">
+            <i class="bi bi-arrow-down-circle"></i>
+            Load Next Batch
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="rdb-scan-note">
+        Showing one SCAN batch at a time (cursor: {{ cursor }}{% if has_more %} → {{ next_cursor }}{% else %}, scan complete{% endif %}). Results are not a live snapshot of the whole keyspace.
+    </div>
+    {% else %}
+    <div class="rdb-empty">No keys matched this pattern.</div>
+    {% endif %}
+</div>
+{% endblock %}

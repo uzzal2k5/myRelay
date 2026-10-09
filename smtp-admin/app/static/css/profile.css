@@ -1,0 +1,211 @@
+:root {
+    --pf-border: #e2e8f0;
+    --pf-muted: #64748b;
+    --pf-text: #172033;
+    --pf-bg-subtle: #f8fafc;
+    --pf-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --pf-ok: #15803d;
+    --pf-ok-bg: #ecfdf5;
+    --pf-ok-border: #a7f3d0;
+    --pf-bad: #b91c1c;
+    --pf-bad-bg: #fef2f2;
+    --pf-bad-border: #fecaca;
+    --pf-security: #7e22ce;
+    --pf-security-bg: #f5f3ff;
+    --pf-admin: #1d4ed8;
+    --pf-admin-bg: #eff6ff;
+    --pf-readonly: #64748b;
+    --pf-readonly-bg: #f1f5f9;
+}
+
+.profile-container {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 26px;
+    margin-bottom: 20px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0A1930 0%, #163454 100%);
+    color: #fff;
+}
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 24px;
+}
+
+.profile-hero-name {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.profile-hero-username {
+    font-size: 13px;
+    color: #a9c3dd;
+    font-family: Consolas, "SFMono-Regular", monospace;
+}
+
+.profile-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.profile-role-badge.is-security_admin {
+    background: var(--pf-security-bg);
+    color: var(--pf-security);
+}
+
+.profile-role-badge.is-smtp_admin {
+    background: var(--pf-admin-bg);
+    color: var(--pf-admin);
+}
+
+.profile-role-badge.is-read_only {
+    background: var(--pf-readonly-bg);
+    color: var(--pf-readonly);
+}
+
+.profile-panel {
+    background: #fff;
+    border: 1px solid var(--pf-border);
+    border-radius: 12px;
+    box-shadow: var(--pf-shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.profile-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--pf-border);
+    background: var(--pf-bg-subtle);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--pf-text);
+}
+
+.profile-panel-header i {
+    color: var(--pf-muted);
+    font-size: 16px;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.profile-field {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--pf-border);
+}
+
+.profile-field:nth-child(odd) {
+    border-right: 1px solid var(--pf-border);
+}
+
+.profile-field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pf-muted);
+    margin-bottom: 4px;
+}
+
+.profile-field-value {
+    font-size: 13.5px;
+    color: var(--pf-text);
+    overflow-wrap: anywhere;
+}
+
+.profile-field-value.is-unset {
+    font-style: italic;
+    color: var(--pf-muted);
+}
+
+.profile-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.profile-status-pill.is-ok {
+    background: var(--pf-ok-bg);
+    color: var(--pf-ok);
+}
+
+.profile-status-pill.is-bad {
+    background: var(--pf-bad-bg);
+    color: var(--pf-bad);
+}
+
+.profile-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 16px 20px;
+}
+
+.profile-group-chip {
+    padding: 4px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--pf-border);
+    background: var(--pf-bg-subtle);
+    font-size: 12px;
+    color: var(--pf-text);
+}
+
+.profile-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--pf-muted);
+    background: var(--pf-bg-subtle);
+}
+
+.profile-alert i {
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-field:nth-child(odd) {
+        border-right: 0;
+    }
+
+    .profile-hero {
+        flex-direction: column;
+        text-align: center;
+    }
+}

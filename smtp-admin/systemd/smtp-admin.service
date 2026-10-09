@@ -1,0 +1,20 @@
+[Unit]
+Description=MuktoPay SMTP Admin Portal
+After=network.target
+
+[Service]
+Type=simple
+User=shafiqul.islam
+Group=shafiqul.islam
+
+WorkingDirectory=/home/shafiqul.islam/smtp-portal/smtp-admin
+
+ExecStart=/usr/local/bin/uvicorn app.main:app --host 127.0.0.1 --port 8080 --log-level debug
+
+Restart=always
+RestartSec=5
+
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

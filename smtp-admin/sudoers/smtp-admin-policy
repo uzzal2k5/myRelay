@@ -1,0 +1,2 @@
+# Optional: if the helper is root-owned and executable directly, this file may not be needed.
+# Keep privileged access limited to the fixed helper.

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/audit.css">
+
+<div class="audit-header">
+    <div>
+        <h2>Audit Export</h2>
+        <p class="audit-subtitle">Export the full audit trail as CSV or JSON, optionally filtered by date range.</p>
+    </div>
+</div>
+
+{% if error %}
+<div class="audit-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="audit-export-panel">
+    <h3>Export Audit Log</h3>
+    <p>Leave dates blank to export the entire log. Exports are themselves recorded in the audit trail.</p>
+
+    <div class="audit-export-total">
+        <i class="bi bi-database-fill"></i>
+        <span><strong>{{ total_entries }}</strong> total entries currently in the audit log</span>
+    </div>
+
+    <form class="audit-export-form" method="get" action="/audit/export/download" id="exportForm">
+
+        <div class="audit-export-field">
+            <label for="start_date">From</label>
+            <input type="date" id="start_date" name="start_date">
+        </div>
+
+        <div class="audit-export-field">
+            <label for="end_date">To</label>
+            <input type="date" id="end_date" name="end_date">
+        </div>
+
+        <div class="audit-export-buttons">
+            <button type="submit" formaction="/audit/export/download?format=csv" class="audit-export-btn" onclick="return setExportFormat('csv')">
+                <i class="bi bi-filetype-csv"></i>
+                Export CSV
+            </button>
+
+            <button type="submit" formaction="/audit/export/download?format=json" class="audit-export-btn is-secondary" onclick="return setExportFormat('json')">
+                <i class="bi bi-filetype-json"></i>
+                Export JSON
+            </button>
+        </div>
+
+    </form>
+
+    <div class="audit-export-note">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>
+            CSV exports include common fields (timestamp, user, role, action,
+            object, result, source IP) plus an "extra" column with any
+            additional details as JSON. JSON exports include the full
+            record for every entry.
+        </span>
+    </div>
+</div>
+
+<script>
+    function setExportFormat(format) {
+        const form = document.getElementById("exportForm");
+        const startDate = document.getElementById("start_date").value;
+        const endDate = document.getElementById("end_date").value;
+
+        const params = new URLSearchParams();
+        params.set("format", format);
+        if (startDate) params.set("start_date", startDate);
+        if (endDate) params.set("end_date", endDate);
+
+        form.setAttribute("action", "/audit/export/download?" + params.toString());
+        return true;
+    }
+</script>
+{% endblock %}

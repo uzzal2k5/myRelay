@@ -1,0 +1,226 @@
+<!-- Top Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark relay-navbar">
+    <div class="container-fluid">
+
+        <!-- Brand / Logo -->
+        <a class="navbar-brand d-flex align-items-center"
+           href="/dashboard">
+
+            <div class="relay-logo me-2">
+                <i class="bi bi-envelope-check"></i>
+            </div>
+
+            <div class="brand-text">
+                <span class="brand-name">My Relay</span>
+                <small class="brand-subtitle">SMTP RELAY MANAGEMENT</small>
+            </div>
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#relayTopNavbar"
+                aria-controls="relayTopNavbar"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navigation Content -->
+        <div class="collapse navbar-collapse"
+             id="relayTopNavbar">
+
+            <!-- Left Side -->
+            <ul class="navbar-nav me-auto">
+
+                <!-- Relay Server -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="#"
+                       id="relaySelector"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+
+                        <i class="bi bi-server me-1"></i>
+                        mpsmtp01
+                    </a>
+
+                    <ul class="dropdown-menu"
+                        aria-labelledby="relaySelector">
+
+                        <li>
+                            <a class="dropdown-item active"
+                               href="/dashboard">
+                                mpsmtp01
+                            </a>
+                        </li>
+
+                        <!-- Add additional relay servers here -->
+                    </ul>
+                </li>
+
+                <!-- System Status -->
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="/monitoring">
+
+                        <i class="bi bi-activity me-1"></i>
+                        System Status
+
+                        <span class="status-indicator"></span>
+                    </a>
+                </li>
+
+            </ul>
+
+            <!-- Right Side -->
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+
+                <!-- Notifications -->
+                <li class="nav-item dropdown">
+
+                    <a class="nav-link notification-link"
+                       href="#"
+                       id="notificationDropdown"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false"
+                       aria-label="Notifications">
+
+                        <i class="bi bi-bell"></i>
+
+                        {% if notification_count|default(0) > 0 %}
+                        <span class="notification-badge">
+                            {{ notification_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end"
+                        aria-labelledby="notificationDropdown">
+
+                        <li>
+                            <h6 class="dropdown-header">
+                                Notifications
+                            </h6>
+                        </li>
+
+                        {% if notifications|default([]) %}
+                        {% for notification in notifications %}
+                        <li>
+                            <a class="dropdown-item"
+                               href="{{ notification.url }}">
+                                {{ notification.message }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        {% else %}
+                        <li>
+                                <span class="dropdown-item-text text-muted">
+                                    No new notifications
+                                </span>
+                        </li>
+                        {% endif %}
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item"
+                               href="/notifications">
+                                View All Notifications
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <!-- User Profile -->
+                {% if request.session.get("username") %}
+                <li class="nav-item dropdown">
+
+                    <a class="nav-link dropdown-toggle user-profile"
+                       href="#"
+                       id="userProfileDropdown"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+
+                        <i class="bi bi-person-circle me-1"></i>
+
+                        <span>
+                            {{ current_user.display_name
+                               | default(request.session.get("username")) }}
+                        </span>
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end"
+                        aria-labelledby="userProfileDropdown">
+
+                        <li>
+                            <h6 class="dropdown-header">
+                                {{ current_user.display_name
+                                | default(request.session.get("username")) }}
+                            </h6>
+                        </li>
+
+                        <li>
+                            <span class="dropdown-item-text">
+                                <i class="bi bi-shield-check me-1"></i>
+                                {{ request.session.get("role")
+                                   | default("Read-Only") }}
+                            </span>
+                        </li>
+
+                        <li>
+                            <span class="dropdown-item-text text-muted">
+                                LDAP / Active Directory
+                            </span>
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item"
+                               href="/profile">
+                                <i class="bi bi-person me-2"></i>
+                                My Profile
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item"
+                               href="/account/security">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                Account Security
+                            </a>
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <form method="post" action="/logout">
+                                <button type="submit"
+                                        class="dropdown-item text-danger">
+
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+
+                    </ul>
+                </li>
+                {% endif %}
+
+            </ul>
+
+        </div>
+    </div>
+</nav>

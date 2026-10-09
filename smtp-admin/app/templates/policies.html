@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/policies.css">
+
+<div class="policies-header">
+    <h2>Existing Postfix Maps</h2>
+</div>
+
+<div class="policies-info">
+    <i class="bi bi-info-circle-fill"></i>
+    <span>
+        These are maps already referenced by the active Postfix configuration.
+        The dashboard does not create a parallel policy directory.
+    </span>
+</div>
+
+{% if error %}
+<div class="policies-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="policies-panel">
+    <div class="policies-panel-header">
+        <i class="bi bi-map"></i>
+        Discovered Maps
+    </div>
+
+    <div class="policies-table-wrapper">
+        <table class="policies-table">
+            <thead>
+            <tr>
+                <th scope="col">Map File</th>
+                <th scope="col">Postfix Configuration Key</th>
+                <th scope="col">Map Specification</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for path, meta in maps.items() %}
+            <tr>
+                <td><code>{{ path }}</code></td>
+                <td><code>{{ meta.config_key }}</code></td>
+                <td><code>{{ meta.spec }}</code></td>
+                <td>
+                    <a class="policies-view-btn" href="/postfix/policies/map?path={{ path|urlencode }}">
+                        <i class="bi bi-pencil-square"></i>
+                        View / Edit
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="policies-empty">
+                    No allow-listed map files were discovered from the current Postfix configuration.
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h3 class="policies-tools-heading">Related Configuration Tools</h3>
+
+<div class="policies-tools-grid">
+
+    <a class="policies-tool-card" href="/postfix/config">
+        <div class="policies-tool-icon"><i class="bi bi-sliders"></i></div>
+        <div class="policies-tool-body">
+            <div class="policies-tool-title">Effective Configuration</div>
+            <div class="policies-tool-desc">View the fully resolved Postfix configuration currently in effect.</div>
+        </div>
+    </a>
+
+    <a class="policies-tool-card" href="/submission/config">
+        <div class="policies-tool-icon"><i class="bi bi-gear"></i></div>
+        <div class="policies-tool-body">
+            <div class="policies-tool-title">Submission Configuration</div>
+            <div class="policies-tool-desc">Review submission-port restrictions currently applied.</div>
+        </div>
+    </a>
+
+    <a class="policies-tool-card" href="/view/submission">
+        <div class="policies-tool-icon"><i class="bi bi-eye"></i></div>
+        <div class="policies-tool-body">
+            <div class="policies-tool-title">View Submission Restrictions</div>
+            <div class="policies-tool-desc">Inspect the raw submission restriction rules.</div>
+        </div>
+    </a>
+
+    <a class="policies-tool-card" href="/formatted/submission">
+        <div class="policies-tool-icon"><i class="bi bi-list-check"></i></div>
+        <div class="policies-tool-body">
+            <div class="policies-tool-title">Formatted Submission</div>
+            <div class="policies-tool-desc">A cleaned-up, readable view of submission restrictions.</div>
+        </div>
+    </a>
+
+    <a class="policies-tool-card" href="/certificates">
+        <div class="policies-tool-icon"><i class="bi bi-shield-lock"></i></div>
+        <div class="policies-tool-body">
+            <div class="policies-tool-title">TLS Certificates</div>
+            <div class="policies-tool-desc">Manage the public certificate files used for SMTP TLS.</div>
+        </div>
+    </a>
+
+</div>
+{% endblock %}

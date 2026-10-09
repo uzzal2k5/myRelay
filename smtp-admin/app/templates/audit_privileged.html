@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/audit.css">
+
+<div class="audit-header">
+    <div>
+        <h2>Privileged Activity</h2>
+        <p class="audit-subtitle">Service control, restarts, deletions, and other high-impact administrative actions.</p>
+    </div>
+
+    <div class="audit-search">
+        <i class="bi bi-search"></i>
+        <input
+                type="text"
+                id="privilegedSearchInput"
+                value="{{ search_query }}"
+                placeholder="Filter by user, action, object, IP..."
+                oninput="filterPrivilegedTable(this.value)">
+    </div>
+</div>
+
+{% if error %}
+<div class="audit-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="audit-summary-grid">
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-total"><i class="bi bi-shield-exclamation"></i></div>
+        <div>
+            <div class="audit-summary-label">Total Events</div>
+            <div class="audit-summary-value">{{ entries|length }}</div>
+        </div>
+    </div>
+
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-success"><i class="bi bi-check-circle-fill"></i></div>
+        <div>
+            <div class="audit-summary-label">Succeeded</div>
+            <div class="audit-summary-value">{{ success_count }}</div>
+        </div>
+    </div>
+
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-failed"><i class="bi bi-x-circle-fill"></i></div>
+        <div>
+            <div class="audit-summary-label">Failed</div>
+            <div class="audit-summary-value">{{ failed_count }}</div>
+        </div>
+    </div>
+
+    <div class="audit-summary-tile">
+        <div class="audit-summary-icon is-actor"><i class="bi bi-person-badge-fill"></i></div>
+        <div>
+            <div class="audit-summary-label">Distinct Actors</div>
+            <div class="audit-summary-value">{{ actor_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="audit-legend">
+    <div class="audit-legend-item"><span class="audit-legend-dot is-delete"></span>Delete / Clear</div>
+    <div class="audit-legend-item"><span class="audit-legend-dot is-reload"></span>Reload / Restart / Stop</div>
+    <div class="audit-legend-item"><span class="audit-legend-dot is-update"></span>Start / Enable / Flush</div>
+</div>
+
+<div class="audit-panel">
+    {% if entries %}
+    <div class="audit-table-wrapper">
+        <table class="audit-table" id="privilegedTable">
+            <thead>
+            <tr>
+                <th scope="col">Timestamp</th>
+                <th scope="col">User</th>
+                <th scope="col">Action</th>
+                <th scope="col">Object</th>
+                <th scope="col">Source IP</th>
+                <th scope="col">Details</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for entry in entries %}
+            {% set action = entry.action or "" %}
+            {% set action_lower = action | lower %}
+
+            {% set badge_class =
+            "is-delete" if ("delete" in action_lower or "clear" in action_lower)
+            else "is-reload" if ("reload" in action_lower or "restart" in action_lower or "stop" in action_lower)
+            else "is-update" if ("start" in action_lower or "enable" in action_lower or "flush" in action_lower)
+            else "is-other" %}
+
+            {% set result = (entry.result or "") | upper %}
+
+            <tr class="audit-row" data-search="{{ (entry.username or '') ~ ' ' ~ action ~ ' ' ~ (entry.object or '') ~ ' ' ~ (entry.source_ip or '') | lower }}">
+
+                <td class="audit-timestamp">{{ entry.timestamp or "—" }}</td>
+
+                <td>
+                    <span class="audit-user">{{ entry.username or "unknown" }}</span>
+                    {% if entry.role %}
+                    <span class="audit-role">{{ entry.role }}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <span class="audit-badge {{ badge_class }}">{{ action }}</span>
+
+                    {% if result %}
+                    <div class="audit-result-dot {{ 'is-success' if result == 'SUCCESS' else 'is-failed' if result == 'FAILED' else '' }}">
+                        {{ result }}
+                    </div>
+                    {% endif %}
+                </td>
+
+                <td class="audit-object">{{ entry.object or "—" }}</td>
+
+                <td class="audit-ip">{{ entry.source_ip or "—" }}</td>
+
+                <td>
+                    <details class="audit-details">
+                        <summary>View raw</summary>
+                        <pre class="audit-raw">{{ entry._raw }}</pre>
+                    </details>
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="audit-empty">
+        No privileged activity recorded. If service start/stop/restart actions
+        aren't being audited yet (see the # TODO in smtp_policy/routes.py's
+        service action handler), those events won't appear here until that's wired up.
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function filterPrivilegedTable(query) {
+        const normalized = query.trim().toLowerCase();
+        const rows = document.querySelectorAll("#privilegedTable tbody .audit-row");
+
+        rows.forEach(row => {
+            const haystack = row.getAttribute("data-search") || "";
+            row.style.display = haystack.includes(normalized) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

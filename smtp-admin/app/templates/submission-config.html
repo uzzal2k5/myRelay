@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/submission-config.css">
+
+<div class="config-container">
+
+    <div class="page-header">
+        <div>
+            <h2>SMTP Submission Configuration</h2>
+            <p class="page-description">
+                Current Postfix submission access and recipient restrictions
+            </p>
+        </div>
+
+        <div class="status-badge status-active">
+            Active
+        </div>
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- Client Access Control -->
+    <!-- ========================= -->
+
+    <div class="config-card">
+
+        <div class="config-card-header">
+            <i class="bi bi-hdd-network"></i>
+            <div>
+                <h3>Client Access Control</h3>
+                <p>Source IP address submission policy</p>
+            </div>
+        </div>
+
+        <div class="config-grid">
+
+            <!-- Allowed IPs -->
+            <div class="config-section">
+
+                <div class="section-title">
+                    <span>Allowed IP Addresses</span>
+                    <span class="count-badge">{{ submission_config.client_access.allowed.count }}</span>
+                </div>
+
+                {% if submission_config.client_access.allowed.items %}
+                <div class="config-list">
+                    {% for ip in submission_config.client_access.allowed.items %}
+                    <div class="config-item allowed-item">
+                        <span class="item-icon"><i class="bi bi-check-circle-fill"></i></span>
+                        <code>{{ ip }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No allowed IP addresses configured.</div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- Blocked IPs -->
+            <div class="config-section">
+
+                <div class="section-title">
+                    <span>Blocked IP Addresses</span>
+                    <span class="count-badge">{{ submission_config.client_access.blocked.count }}</span>
+                </div>
+
+                {% if submission_config.client_access.blocked.items %}
+                <div class="config-list">
+                    {% for ip in submission_config.client_access.blocked.items %}
+                    <div class="config-item blocked-item">
+                        <span class="item-icon"><i class="bi bi-x-circle-fill"></i></span>
+                        <code>{{ ip }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No blocked IP addresses configured.</div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- Denied IPs -->
+            <div class="config-section">
+
+                <div class="section-title">
+                    <span>Denied IP Addresses</span>
+                    <span class="count-badge">{{ submission_config.client_access.denied.count }}</span>
+                </div>
+
+                {% if submission_config.client_access.denied.items %}
+                <div class="config-list">
+                    {% for ip in submission_config.client_access.denied.items %}
+                    <div class="config-item denied-item">
+                        <span class="item-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                        <code>{{ ip }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No denied IP addresses configured.</div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- Recipient Domain Control -->
+    <!-- ========================= -->
+
+    <div class="config-card">
+
+        <div class="config-card-header">
+            <i class="bi bi-envelope-check"></i>
+            <div>
+                <h3>Recipient Domain Control</h3>
+                <p>Destination domain submission policy</p>
+            </div>
+        </div>
+
+        <div class="config-grid">
+
+            <!-- Allowed Domains -->
+            <div class="config-section">
+
+                <div class="section-title">
+                    <span>Allowed Recipient Domains</span>
+                    <span class="count-badge">{{ submission_config.recipient_domains.allowed.count }}</span>
+                </div>
+
+                {% if submission_config.recipient_domains.allowed.items %}
+                <div class="config-list">
+                    {% for domain in submission_config.recipient_domains.allowed.items %}
+                    <div class="config-item allowed-item">
+                        <span class="item-icon"><i class="bi bi-check-circle-fill"></i></span>
+                        <code>{{ domain }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No allowed recipient domains configured.</div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- Rejected Domains -->
+            <div class="config-section">
+
+                <div class="section-title">
+                    <span>Rejected Recipient Domains</span>
+                    <span class="count-badge">{{ submission_config.recipient_domains.rejected.count }}</span>
+                </div>
+
+                {% if submission_config.recipient_domains.rejected.items %}
+                <div class="config-list">
+                    {% for domain in submission_config.recipient_domains.rejected.items %}
+                    <div class="config-item rejected-item">
+                        <span class="item-icon"><i class="bi bi-x-circle-fill"></i></span>
+                        <code>{{ domain }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No rejected recipient domains configured.</div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- Restricted Domains -->
+            <div class="config-section">
+
+                <div class="section-title">
+                    <span>Restricted Recipient Domains</span>
+                    <span class="count-badge">{{ submission_config.recipient_domains.restricted.count }}</span>
+                </div>
+
+                {% if submission_config.recipient_domains.restricted.items %}
+                <div class="config-list">
+                    {% for domain in submission_config.recipient_domains.restricted.items %}
+                    <div class="config-item restricted-item">
+                        <span class="item-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                        <code>{{ domain }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No restricted recipient domains configured.</div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- Configuration Summary -->
+    <!-- ========================= -->
+
+    <div class="config-card">
+
+        <div class="config-card-header">
+            <i class="bi bi-bar-chart-line"></i>
+            <div>
+                <h3>Configuration Summary</h3>
+                <p>Current submission restriction statistics</p>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+
+            <div class="summary-item">
+                <span class="summary-label">Allowed IPs</span>
+                <strong>{{ submission_config.summary.allowed_ips }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-label">Blocked IPs</span>
+                <strong>{{ submission_config.summary.blocked_ips }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-label">Denied IPs</span>
+                <strong>{{ submission_config.summary.denied_ips }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-label">Allowed Domains</span>
+                <strong>{{ submission_config.summary.allowed_recipient_domains }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-label">Rejected Domains</span>
+                <strong>{{ submission_config.summary.rejected_recipient_domains }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-label">Restricted Domains</span>
+                <strong>{{ submission_config.summary.restricted_recipient_domains }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

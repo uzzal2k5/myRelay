@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/backups.css">
+
+<div class="bk-header">
+    <div>
+        <h2>Backup &amp; Restore</h2>
+        <p class="bk-subtitle">Timestamped backups created automatically before every Postfix map edit.</p>
+    </div>
+
+    <span class="bk-size-pill">
+        <i class="bi bi-hdd-fill"></i>
+        {{ backups|length }} backups, {{ "%.1f"|format(total_size / 1024 / 1024) }} MB total
+    </span>
+</div>
+
+{% if error %}
+<div class="bk-alert is-error"><i class="bi bi-exclamation-triangle-fill"></i><span>{{ error }}</span></div>
+{% endif %}
+{% if success %}
+<div class="bk-alert is-success"><i class="bi bi-check-circle-fill"></i><span>{{ success }}</span></div>
+{% endif %}
+
+<div class="bk-panel">
+    {% if backups %}
+    <div class="bk-table-wrapper">
+        <table class="bk-table">
+            <thead>
+            <tr>
+                <th>Original File</th><th>Backup Filename</th><th>Created</th><th>Size</th><th>Status</th>
+                {% if is_editor %}<th>Actions</th>{% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for b in backups %}
+            <tr>
+                <td>{{ b.original_name or "—" }}</td>
+                <td class="bk-filename">{{ b.filename }}</td>
+                <td>{{ b.timestamp or "—" }}</td>
+                <td>{{ "%.1f"|format(b.size_bytes / 1024) }} KB</td>
+                <td>
+                    {% if b.is_restorable %}
+                    <span class="bk-badge">Active map</span>
+                    {% else %}
+                    <span class="bk-badge is-unmanaged">Not restorable</span>
+                    {% endif %}
+                </td>
+                {% if is_editor %}
+                <td>
+                    {% if b.is_restorable %}
+                    <a href="/backups/{{ b.filename }}/preview" class="bk-restore-btn">
+                        <i class="bi bi-arrow-counterclockwise"></i>Restore
+                    </a>
+                    <form method="post" action="/backups/restore" style="display:inline"
+                          onsubmit="return confirm('Restore {{ b.original_name }} from this backup? The current file will itself be backed up first, then validated and Postfix reloaded.');">
+                        <input type="hidden" name="filename" value="{{ b.filename }}">
+                        <button type="submit" class="bk-restore-btn"><i class="bi bi-arrow-counterclockwise"></i>Restore</button>
+                    </form>
+                    {% endif %}
+
+                    <form method="post" action="/backups/{{ b.filename }}/delete" style="display:inline"
+                          onsubmit="return confirm('Permanently delete this backup file?');">
+                        <button type="submit" class="bk-delete-btn"><i class="bi bi-trash3"></i>Delete</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bk-empty">No backups exist yet. One is created automatically the first time a map is edited.</div>
+    {% endif %}
+</div>
+{% endblock %}

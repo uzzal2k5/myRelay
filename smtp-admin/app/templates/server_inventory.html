@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/server-inventory.css">
+
+<div class="si-header">
+    <div>
+        <h2>Server Inventory</h2>
+        <p class="si-subtitle">SMTP relay servers managed through this portal.</p>
+    </div>
+
+    {% if is_editor %}
+    <button type="button" class="si-add-btn" onclick="document.getElementById('siAddForm').classList.toggle('is-open')">
+        <i class="bi bi-plus-lg"></i>
+        Add Server
+    </button>
+    {% endif %}
+</div>
+
+{% if error %}
+<div class="si-alert is-error"><i class="bi bi-exclamation-triangle-fill"></i><span>{{ error }}</span></div>
+{% endif %}
+{% if success %}
+<div class="si-alert is-success"><i class="bi bi-check-circle-fill"></i><span>{{ success }}</span></div>
+{% endif %}
+
+{% if is_editor %}
+<div class="si-form-panel" id="siAddForm">
+    <form method="post" action="/server/inventory/add">
+        <div class="si-form-grid">
+            <div class="si-field">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="mpsmtp02" required>
+            </div>
+            <div class="si-field">
+                <label for="hostname">Hostname or IP</label>
+                <input type="text" id="hostname" name="hostname" placeholder="mpsmtp02.muktopay.com" required>
+            </div>
+            <div class="si-field">
+                <label for="environment">Environment</label>
+                <select id="environment" name="environment" required>
+                    {% for env in environments %}
+                    <option value="{{ env }}">{{ env | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="si-field">
+                <label for="role">Role</label>
+                <select id="role" name="role" required>
+                    {% for r in roles %}
+                    <option value="{{ r }}">{{ r | replace("_", " ") | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="si-field">
+                <label for="port">SMTP Port</label>
+                <input type="number" id="port" name="port" value="25" min="1" max="65535" required>
+            </div>
+            <div class="si-field">
+                <label for="notes">Notes</label>
+                <input type="text" id="notes" name="notes" placeholder="Optional">
+            </div>
+        </div>
+        <button type="submit" class="si-add-btn"><i class="bi bi-save"></i>Save Server</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="si-panel">
+    {% if servers %}
+    <div class="si-table-wrapper">
+        <table class="si-table">
+            <thead>
+            <tr>
+                <th>Name</th><th>Hostname</th><th>Environment</th><th>Role</th><th>Port</th><th>Notes</th><th>Status</th>
+                {% if is_editor %}<th>Actions</th>{% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for server in servers %}
+            <tr id="si-row-{{ server.id }}">
+                <td><strong>{{ server.name }}</strong></td>
+                <td class="si-hostname">{{ server.hostname }}</td>
+                <td><span class="si-badge env-{{ server.environment }}">{{ server.environment }}</span></td>
+                <td>{{ server.role | replace("_", " ") | title }}</td>
+                <td>{{ server.port }}</td>
+                <td>{{ server.notes or "—" }}</td>
+                <td>
+                    <button type="button" class="si-check-btn" onclick="checkServer('{{ server.id }}')">
+                        <i class="bi bi-wifi"></i>Check
+                    </button>
+                    <div class="si-check-result" id="si-check-{{ server.id }}"></div>
+                </td>
+                {% if is_editor %}
+                <td>
+                    <form method="post" action="/server/inventory/{{ server.id }}/delete"
+                          onsubmit="return confirm('Remove {{ server.name }} from the inventory?');">
+                        <button type="submit" class="si-delete-btn"><i class="bi bi-trash3"></i>Remove</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="si-empty">No servers in the inventory yet.</div>
+    {% endif %}
+</div>
+
+<script>
+    async function checkServer(serverId) {
+        const resultEl = document.getElementById("si-check-" + serverId);
+        resultEl.textContent = "Checking...";
+        resultEl.className = "si-check-result";
+
+        try {
+            const response = await fetch(`/server/inventory/${serverId}/check`, { method: "POST" });
+            const data = await response.json();
+
+            if (data.reachable) {
+                resultEl.textContent = `Reachable (${data.elapsed_ms} ms)`;
+                resultEl.classList.add("is-ok");
+            } else {
+                resultEl.textContent = data.error || "Unreachable";
+                resultEl.classList.add("is-bad");
+            }
+        } catch (err) {
+            resultEl.textContent = "Check failed";
+            resultEl.classList.add("is-bad");
+        }
+    }
+</script>
+{% endblock %}

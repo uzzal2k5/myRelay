@@ -1,0 +1,85 @@
+{% set policy_name = "allowed" %}
+{% set policy = policies.get(policy_name) %}
+
+{% if policy %}
+<div class="policy-section">
+
+    <div class="policy-header" onclick="togglePolicy(this)">
+        <div class="policy-header-left">
+            <div class="policy-title">{{ policy.title }}</div>
+            <div class="policy-file">{{ policy.file_path }}</div>
+        </div>
+        <div class="policy-arrow">▼</div>
+    </div>
+
+    <div class="policy-content">
+        <div class="policy-description">{{ policy.description }}</div>
+
+        <form method="post" action="/recipient/domains/{{ policy_name }}">
+
+            <div id="{{ policy_name }}-entries">
+                {% if policy.entries %}
+                {% for entry in policy.entries %}
+                <div class="entry-row">
+
+                    <div>
+                        <div class="field-label">Domain</div>
+                        <input
+                                type="text"
+                                name="values"
+                                value="{{ entry.value }}"
+                                placeholder="example.com"
+                                required>
+                    </div>
+
+                    <div>
+                        <div class="field-label">Action</div>
+                        <input type="hidden" name="actions" value="OK">
+                        <select disabled>
+                            <option selected>OK</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="field-label">Rejection Message</div>
+                        <input type="hidden" name="messages" value="">
+                        <input type="text" value="No rejection message" disabled>
+                    </div>
+
+                    <div>
+                        <div class="field-label">&nbsp;</div>
+                        <button
+                                type="button"
+                                class="remove-entry"
+                                onclick="removeEntry(this)"
+                                title="Remove">
+                            ✕
+                        </button>
+                    </div>
+
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-message" id="{{ policy_name }}-empty">
+                    No entries configured.
+                </div>
+                {% endif %}
+            </div>
+
+            <button
+                    type="button"
+                    class="add-entry"
+                    onclick="addEntry('{{ policy_name }}')">
+                + Add Entry
+            </button>
+
+            <div class="policy-actions">
+                <button type="submit" class="save-button">
+                    Apply Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endif %}

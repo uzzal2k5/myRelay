@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/monitoring.css">
+
+<div class="mon-header">
+    <div>
+        <h2>System Status</h2>
+        <p class="mon-subtitle">Live health of every subsystem this portal manages, plus host resource usage.</p>
+    </div>
+
+    <span class="mon-overall-pill {{ 'is-ok' if all_ok else 'is-bad' }}">
+        <i class="bi {{ 'bi-check-circle-fill' if all_ok else 'bi-exclamation-triangle-fill' }}"></i>
+        {% if all_ok %}All systems operational{% else %}{{ down_count }} service{{ "s" if down_count != 1 }} down{% endif %}
+    </span>
+</div>
+
+<div class="mon-service-grid">
+    {% for svc in services %}
+    <a class="mon-service-card" href="{{ svc.link }}">
+        <div class="mon-service-top">
+            <div class="mon-service-icon {{ 'is-ok' if svc.ok else 'is-bad' }}">
+                <i class="bi {{ svc.icon }}"></i>
+            </div>
+            <div>
+                <div class="mon-service-name">{{ svc.name }}</div>
+                <div class="mon-service-state">{{ svc.state }}</div>
+            </div>
+        </div>
+
+        {% if svc.detail %}
+        <div class="mon-service-detail">{{ svc.detail }}</div>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="mon-panel">
+    <div class="mon-panel-header">
+        <i class="bi bi-cpu"></i>
+        Host Resources
+    </div>
+
+    {% if host.error %}
+    <div class="mon-disk-row"><span class="mon-disk-error">{{ host.error }}</span></div>
+    {% else %}
+    <div class="mon-host-grid">
+        <div>
+            <div class="mon-host-label">Load Average (1m)</div>
+            <div class="mon-host-value">{{ host.load1 if host.load1 is not none else "—" }}</div>
+        </div>
+        <div>
+            <div class="mon-host-label">Load / CPU</div>
+            <div class="mon-host-value">{{ host.load_per_cpu if host.load_per_cpu is not none else "—" }}</div>
+        </div>
+        <div>
+            <div class="mon-host-label">CPU Cores</div>
+            <div class="mon-host-value">{{ host.cpu_count }}</div>
+        </div>
+        <div>
+            <div class="mon-host-label">Memory Used</div>
+            <div class="mon-host-value">{{ (host.mem_used_percent ~ "%") if host.mem_used_percent is not none else "—" }}</div>
+        </div>
+        <div>
+            <div class="mon-host-label">Total Memory</div>
+            <div class="mon-host-value">{{ (host.mem_total_gb ~ " GB") if host.mem_total_gb is not none else "—" }}</div>
+        </div>
+        <div>
+            <div class="mon-host-label">Uptime</div>
+            <div class="mon-host-value">{{ (host.uptime_days ~ "d") if host.uptime_days is not none else "—" }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="mon-panel">
+    <div class="mon-panel-header">
+        <i class="bi bi-hdd-fill"></i>
+        Disk Usage
+    </div>
+
+    {% for disk in disks %}
+    <div class="mon-disk-row">
+        <div class="mon-disk-top">
+            <div>
+                <span class="mon-disk-label">{{ disk.label }}</span>
+                <span class="mon-disk-path">{{ disk.path }}</span>
+            </div>
+            {% if disk.percent is not none %}
+            <span class="mon-disk-figure">{{ disk.percent }}% ({{ disk.used_gb }} / {{ disk.total_gb }} GB)</span>
+            {% endif %}
+        </div>
+
+        {% if disk.error %}
+        <span class="mon-disk-error">{{ disk.error }}</span>
+        {% else %}
+        <div class="mon-disk-bar-track">
+            <div class="mon-disk-bar-fill is-{{ disk.level }}" style="width: {{ disk.percent }}%;"></div>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

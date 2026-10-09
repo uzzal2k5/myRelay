@@ -1,0 +1,289 @@
+:root {
+    --rh-border: #e2e8f0;
+    --rh-muted: #64748b;
+    --rh-text: #172033;
+    --rh-bg-subtle: #f8fafc;
+    --rh-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --rh-primary: #1d4ed8;
+    --rh-primary-hover: #1a41b8;
+    --rh-ok: #15803d;
+    --rh-ok-bg: #ecfdf5;
+    --rh-ok-border: #a7f3d0;
+    --rh-warn: #b45309;
+    --rh-warn-bg: #fffbeb;
+    --rh-warn-border: #fde68a;
+    --rh-error-bg: #fef2f2;
+    --rh-error-border: #fecaca;
+    --rh-error-text: #991b1b;
+    --rh-success-bg: #ecfdf5;
+    --rh-success-border: #a7f3d0;
+    --rh-success-text: #166534;
+}
+
+.relayhost-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.relayhost-header h2 {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--rh-text);
+    letter-spacing: -0.01em;
+}
+
+.relayhost-subtitle {
+    margin: 0;
+    color: var(--rh-muted);
+    font-size: 14px;
+}
+
+.relayhost-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.relayhost-status-pill::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.relayhost-status-pill.is-configured {
+    background: var(--rh-ok-bg);
+    border-color: var(--rh-ok-border);
+    color: var(--rh-ok);
+}
+
+.relayhost-status-pill.is-unconfigured {
+    background: var(--rh-warn-bg);
+    border-color: var(--rh-warn-border);
+    color: var(--rh-warn);
+}
+
+.relayhost-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+
+.relayhost-alert i {
+    font-size: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.relayhost-alert.is-error {
+    background: var(--rh-error-bg);
+    border-color: var(--rh-error-border);
+    border-left: 3px solid var(--rh-error-text);
+    color: var(--rh-error-text);
+}
+
+.relayhost-alert.is-success {
+    background: var(--rh-success-bg);
+    border-color: var(--rh-success-border);
+    border-left: 3px solid var(--rh-success-text);
+    color: var(--rh-success-text);
+}
+
+.relayhost-panel {
+    background: #fff;
+    border: 1px solid var(--rh-border);
+    border-radius: 12px;
+    box-shadow: var(--rh-shadow);
+    overflow: hidden;
+}
+
+.relayhost-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--rh-border);
+    background: var(--rh-bg-subtle);
+    font-weight: 600;
+    color: var(--rh-text);
+    font-size: 14px;
+}
+
+.relayhost-panel-header i {
+    color: var(--rh-muted);
+    font-size: 16px;
+}
+
+.relayhost-panel-body {
+    padding: 22px;
+}
+
+.relayhost-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.relayhost-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rh-text);
+}
+
+.relayhost-field input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--rh-text);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.relayhost-field input:focus {
+    outline: none;
+    border-color: var(--rh-primary);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+}
+
+.relayhost-field-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--rh-muted);
+}
+
+.relayhost-current-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.relayhost-current-label span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rh-text);
+}
+
+.relayhost-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rh-muted);
+    background: #fff;
+    border: 1px solid var(--rh-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.relayhost-copy-btn:hover {
+    background: var(--rh-bg-subtle);
+    color: var(--rh-text);
+}
+
+.relayhost-current-value {
+    margin: 0;
+    padding: 14px 16px;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--rh-text);
+    background: var(--rh-bg-subtle);
+    border: 1px solid var(--rh-border);
+    border-radius: 8px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.relayhost-current-value.is-unset {
+    color: var(--rh-muted);
+    font-style: italic;
+}
+
+.relayhost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.relayhost-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: var(--rh-text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.relayhost-btn:hover {
+    background: var(--rh-bg-subtle);
+    box-shadow: var(--rh-shadow);
+    color: var(--rh-text);
+}
+
+.relayhost-btn-primary {
+    background: var(--rh-primary);
+    border-color: var(--rh-primary);
+    color: #fff;
+}
+
+.relayhost-btn-primary:hover {
+    background: var(--rh-primary-hover);
+    border-color: var(--rh-primary-hover);
+    color: #fff;
+}
+
+@media (max-width: 700px) {
+    .relayhost-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .relayhost-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .relayhost-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .relayhost-btn {
+        justify-content: center;
+    }
+}

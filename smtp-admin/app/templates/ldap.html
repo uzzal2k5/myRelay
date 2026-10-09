@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/ldap.css">
+
+<div class="ld-header">
+    <div>
+        <h2>LDAP / AD authentication</h2>
+        <p class="ld-subtitle">How this portal checks people against Active Directory when they sign in.</p>
+    </div>
+
+    {% if cfg.encrypted %}
+    <span class="ld-pill is-ok"><i class="bi bi-lock-fill"></i>Encrypted with {{ cfg.transport }}</span>
+    {% else %}
+    <span class="ld-pill is-warn"><i class="bi bi-unlock-fill"></i>Not encrypted</span>
+    {% endif %}
+</div>
+
+{% if cfg.missing %}
+<div class="ld-alert is-bad">
+    <i class="bi bi-exclamation-octagon-fill"></i>
+    <span>
+        The portal could not find these settings: <strong>{{ cfg.missing | join(", ") }}</strong>.
+        Diagnostics are disabled until they are set. If they are already configured,
+        the field names in <code>config.py</code> differ from the ones this page looks for.
+    </span>
+</div>
+{% endif %}
+
+{% if not cfg.encrypted %}
+<div class="ld-alert is-warn">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>
+        This connection uses plain LDAP, so the bind password and directory data cross the network unencrypted.
+        Switch to LDAPS (port 636) or StartTLS.
+    </span>
+</div>
+{% endif %}
+
+<div class="ld-panel">
+    <div class="ld-panel-header">
+        <i class="bi bi-diagram-3"></i>
+        Current configuration
+    </div>
+
+    <div class="ld-config-grid">
+        <div class="ld-config-row">
+            <div class="ld-config-label">Directory server</div>
+            <div class="ld-config-value {{ '' if cfg.server else 'is-unset' }}">{{ cfg.server or "Not set" }}</div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Port</div>
+            <div class="ld-config-value">{{ cfg.port }}</div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Connection security</div>
+            <div class="ld-config-value">
+                {{ cfg.transport }}{% if cfg.encrypted %}, certificate {{ "verified" if cfg.verify_cert else "not verified" }}{% endif %}
+            </div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Search base (base DN)</div>
+            <div class="ld-config-value {{ '' if cfg.base_dn else 'is-unset' }}">{{ cfg.base_dn or "Not set" }}</div>
+        </div>
+
+        {% if is_editor %}
+        <div class="ld-config-row">
+            <div class="ld-config-label">Bind account</div>
+            <div class="ld-config-value {{ '' if cfg.bind_dn else 'is-unset' }}">{{ cfg.bind_dn or "Not set" }}</div>
+        </div>
+        {% endif %}
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Bind password</div>
+            <div class="ld-config-value is-unset">
+                {% if cfg.bind_password_set %}
+                <span class="ld-secret"><i class="bi bi-shield-lock-fill"></i>Set (hidden)</span>
+                {% else %}
+                Not set
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">AD domain</div>
+            <div class="ld-config-value {{ '' if cfg.domain else 'is-unset' }}">{{ cfg.domain or "Not set" }}</div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Group required to sign in</div>
+            <div class="ld-config-value">{{ cfg.required_group }}</div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Login attribute</div>
+            <div class="ld-config-value">{{ cfg.user_attribute }}</div>
+        </div>
+
+        <div class="ld-config-row">
+            <div class="ld-config-label">Timeout</div>
+            <div class="ld-config-value">{{ cfg.timeout }} seconds</div>
+        </div>
+    </div>
+
+    <div class="ld-config-note">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>
+            These values come from the portal's configuration and cannot be changed here.
+            A wrong value would stop every administrator from signing in, so change them in the
+            configuration file and restart the portal.
+        </span>
+    </div>
+</div>
+
+{% if is_editor %}
+<div class="ld-panel">
+    <div class="ld-panel-header">
+        <i class="bi bi-plug"></i>
+        Test the connection
+    </div>
+
+    <div class="ld-panel-body">
+        <p class="ld-panel-intro">
+            Connects to the directory, signs in as the bind account, and reads the search base.
+            No user password is used.
+        </p>
+
+        <form method="post" action="/ldap/test-connection">
+            <button type="submit" class="ld-btn" {{ 'disabled' if cfg.missing }}>
+            <i class="bi bi-play-fill"></i>
+            Run connection test
+            </button>
+        </form>
+
+        {% if connection_result %}
+        <ul class="ld-steps">
+            {% for step in connection_result.steps %}
+            <li class="ld-step {{ 'is-ok' if step.ok else 'is-bad' }}">
+                <i class="bi {{ 'bi-check-circle-fill' if step.ok else 'bi-x-circle-fill' }}"></i>
+                <div>
+                    <div class="ld-step-name">{{ step.name }}</div>
+                    <div class="ld-step-detail">{{ step.detail }}</div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="ld-result-summary">
+            {{ "The directory connection works." if connection_result.ok else "The connection test failed." }}
+            Finished in {{ connection_result.elapsed_ms }} ms.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="ld-panel">
+    <div class="ld-panel-header">
+        <i class="bi bi-person-search"></i>
+        Look up a user
+    </div>
+
+    <div class="ld-panel-body">
+        <p class="ld-panel-intro">
+            Finds an account in the directory and checks whether it is enabled and belongs to
+            <strong>{{ cfg.required_group }}</strong>. This is a directory check only: it does not test a
+            password or show which portal role the person would get.
+        </p>
+
+        <form method="post" action="/ldap/lookup" class="ld-lookup-form">
+            <input
+                    class="ld-input"
+                    type="text"
+                    name="username"
+                    value="{{ lookup_username }}"
+                    placeholder="Account name, for example jdoe"
+                    autocomplete="off"
+                    maxlength="64"
+                    required>
+            <button type="submit" class="ld-btn" {{ 'disabled' if cfg.missing }}>
+            <i class="bi bi-search"></i>
+            Look up user
+            </button>
+        </form>
+
+        {% if lookup_error %}
+        <div class="ld-verdict is-bad">
+            <i class="bi bi-x-circle-fill"></i>
+            <span>{{ lookup_error }}</span>
+        </div>
+        {% endif %}
+
+        {% if lookup_result %}
+        {% set r = lookup_result %}
+
+        {% if not r.found %}
+        <div class="ld-verdict is-bad">
+            <i class="bi bi-person-x-fill"></i>
+            <span>No account named "{{ r.username }}" was found under the search base.</span>
+        </div>
+        {% else %}
+        {% if r.enabled == false %}
+        <div class="ld-verdict is-bad">
+            <i class="bi bi-slash-circle-fill"></i>
+            <span>The account exists but is disabled, so sign-in will be refused.</span>
+        </div>
+        {% elif r.in_required_group %}
+        <div class="ld-verdict is-ok">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>The account is enabled and belongs to {{ r.required_group }}.</span>
+        </div>
+        {% elif r.group_found == false %}
+        <div class="ld-verdict is-warn">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>
+                    The group {{ r.required_group }} was not found under the search base.
+                    Check the required group setting.
+                </span>
+        </div>
+        {% else %}
+        <div class="ld-verdict is-bad">
+            <i class="bi bi-x-circle-fill"></i>
+            <span>The account is not a member of {{ r.required_group }}, so sign-in will be refused.</span>
+        </div>
+        {% endif %}
+
+        {% if r.ambiguous %}
+        <div class="ld-alert is-warn" style="margin-top: 12px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>More than one account matched. The first match is shown. Login names should be unique.</span>
+        </div>
+        {% endif %}
+
+        <div class="ld-user-grid">
+            <div>
+                <div class="ld-config-label">Display name</div>
+                <div class="ld-config-value {{ '' if r.display_name else 'is-unset' }}">{{ r.display_name or "Not set" }}</div>
+            </div>
+            <div>
+                <div class="ld-config-label">Email</div>
+                <div class="ld-config-value {{ '' if r.mail else 'is-unset' }}">{{ r.mail or "Not set" }}</div>
+            </div>
+            <div>
+                <div class="ld-config-label">Account state</div>
+                <div class="ld-config-value">
+                    {% if r.enabled is none %}Unknown{% elif r.enabled %}Enabled{% else %}Disabled{% endif %}
+                </div>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <div class="ld-config-label">Distinguished name</div>
+                <div class="ld-config-value">{{ r.dn }}</div>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <div class="ld-config-label">Direct group memberships ({{ r.groups | length }}{{ "+" if r.groups_truncated }})</div>
+                {% if r.groups %}
+                <div class="ld-groups">
+                    {% for group in r.groups %}
+                    <span class="ld-group-chip {{ 'is-required' if group | lower == r.required_group | lower }}">{{ group }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="ld-config-value is-unset">None</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="ld-panel">
+    <div class="ld-readonly-note">
+        Connection tests and user lookups are available to administrators.
+    </div>
+</div>
+{% endif %}
+{% endblock %}

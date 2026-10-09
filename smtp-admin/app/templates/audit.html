@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/audit.css">
+
+<div class="audit-header">
+    <div>
+        <h2>Audit Logs</h2>
+        <p class="audit-subtitle">Most recent {{ entries|length }} recorded administrative actions.</p>
+    </div>
+
+    <div class="audit-search">
+        <i class="bi bi-search"></i>
+        <input
+                type="text"
+                id="auditSearchInput"
+                placeholder="Filter by user, action, object, IP..."
+                oninput="filterAuditTable(this.value)">
+    </div>
+</div>
+
+{% if error %}
+<div class="audit-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="audit-panel">
+    {% if entries %}
+    <div class="audit-table-wrapper">
+        <table class="audit-table" id="auditTable">
+            <thead>
+            <tr>
+                <th scope="col">Timestamp</th>
+                <th scope="col">User</th>
+                <th scope="col">Action</th>
+                <th scope="col">Object</th>
+                <th scope="col">Source IP</th>
+                <th scope="col">Details</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for entry in entries %}
+            {% set action = entry.action or "" %}
+            {% set action_lower = action | lower %}
+
+            {% set badge_class =
+            "is-delete" if "delete" in action_lower
+            else "is-update" if ("update" in action_lower or "save" in action_lower)
+            else "is-reload" if "reload" in action_lower
+            else "is-check" if "check" in action_lower
+            else "is-other" %}
+
+            {% set result = (entry.result or "") | upper %}
+
+            <tr class="audit-row" data-search="{{ (entry.username or '') ~ ' ' ~ action ~ ' ' ~ (entry.object or '') ~ ' ' ~ (entry.source_ip or '') | lower }}">
+
+                <td class="audit-timestamp">{{ entry.timestamp or "—" }}</td>
+
+                <td>
+                    {% if entry._parse_error %}
+                    <span class="audit-parse-warning">Unparsed entry</span>
+                    {% else %}
+                    <span class="audit-user">{{ entry.username or "unknown" }}</span>
+                    {% if entry.role %}
+                    <span class="audit-role">{{ entry.role }}</span>
+                    {% endif %}
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if action %}
+                    <span class="audit-badge {{ badge_class }}">{{ action }}</span>
+                    {% endif %}
+
+                    {% if result %}
+                    <div class="audit-result-dot {{ 'is-success' if result == 'SUCCESS' else 'is-failed' if result == 'FAILED' else '' }}">
+                        {{ result }}
+                    </div>
+                    {% endif %}
+                </td>
+
+                <td class="audit-object">{{ entry.object or "—" }}</td>
+
+                <td class="audit-ip">{{ entry.source_ip or "—" }}</td>
+
+                <td>
+                    <details class="audit-details">
+                        <summary>View raw</summary>
+                        <pre class="audit-raw">{{ entry._raw }}</pre>
+                    </details>
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="audit-empty">No audit events recorded.</div>
+    {% endif %}
+</div>
+
+<script>
+    function filterAuditTable(query) {
+        const normalized = query.trim().toLowerCase();
+        const rows = document.querySelectorAll("#auditTable tbody .audit-row");
+
+        rows.forEach(row => {
+            const haystack = row.getAttribute("data-search") || "";
+            row.style.display = haystack.includes(normalized) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+<div class="row g-3 mb-4">
+<div class="col-md-4"><div class="card"><div class="card-body"><h6>Postfix</h6><h3>{{ postfix_status }}</h3></div></div></div>
+<div class="col-md-4"><div class="card"><div class="card-body"><h6>Redis</h6><h3>{{ redis_status }}</h3></div></div></div>
+</div>
+<div class="card">
+<div class="card-header">Postfix Queue</div>
+<div class="card-body"><pre class="mb-0">{{ queue }}</pre></div>
+</div>
+{% endblock %}

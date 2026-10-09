@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/postfix-control.css">
+
+<div class="pc-header">
+    <h2>Service Management</h2>
+    <p class="pc-subtitle">Start, stop, restart, and configure boot-time behavior for Postfix.</p>
+</div>
+
+{% if error %}
+<div class="pc-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>The last action failed. Check the application log for details.</span>
+</div>
+{% endif %}
+
+<div class="pc-panel">
+    <div class="pc-panel-header">
+        <div>
+            <div class="pc-panel-title">Postfix</div>
+            <div class="pc-panel-subtitle">postfix.service</div>
+        </div>
+
+        <span class="pc-status {{ 'is-running' if status.active == 'active' else 'is-stopped' }}">
+            {{ status.active }} / {{ status.enabled }}
+        </span>
+    </div>
+
+    <div class="pc-body">
+        <div class="pc-actions">
+            <form method="post" action="/postfix/control/start">
+                <button type="submit" class="pc-btn pc-btn-primary"><i class="bi bi-play-fill"></i>Start</button>
+            </form>
+
+            <form method="post" action="/postfix/control/stop"
+                  onsubmit="return confirm('Stop Postfix? This will halt all mail delivery until restarted.');">
+                <button type="submit" class="pc-btn pc-btn-danger"><i class="bi bi-stop-fill"></i>Stop</button>
+            </form>
+
+            <form method="post" action="/postfix/control/restart"
+                  onsubmit="return confirm('Restart Postfix? This briefly interrupts mail delivery.');">
+                <button type="submit" class="pc-btn"><i class="bi bi-arrow-repeat"></i>Restart</button>
+            </form>
+
+            {% if status.enabled == 'enabled' %}
+            <form method="post" action="/postfix/control/disable">
+                <button type="submit" class="pc-btn"><i class="bi bi-toggle-off"></i>Disable at Boot</button>
+            </form>
+            {% else %}
+            <form method="post" action="/postfix/control/enable">
+                <button type="submit" class="pc-btn"><i class="bi bi-toggle-on"></i>Enable at Boot</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <p class="pc-note">
+            Service actions require authorized access and are recorded in the audit log.
+            Stop and restart interrupt SMTP relay availability.
+        </p>
+    </div>
+</div>
+{% endblock %}

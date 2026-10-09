@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""
+smtp-admin-postfix-helper
+
+Privileged helper invoked via sudo by the My Relay SMTP admin portal.
+Runs as root so the portal's own service account never needs broad
+root/systemctl/postfix privileges - only passwordless execution of this
+one script, restricted to the subcommands below, via
+/etc/sudoers.d/smtp-admin-postfix-helper.
+
+Usage:
+    smtp-admin-postfix-helper check
+    smtp-admin-postfix-helper reload
+    smtp-admin-postfix-helper postmap <path under /etc/postfix/ip-management>
+    smtp-admin-postfix-helper start|stop|restart|enable|disable
+
+Every invocation is logged to syslog (facility 'authpriv'), independent
+of the portal's own application-level audit log - this is the one
+record that survives even if the audit log service itself is broken,
+misconfigured, or compromised.
+"""
+import os
+import subprocess
+import sys
+import syslog
+from pathlib import Path
+from typing import List, Optional
+
+POSTFIX = "/usr/sbin/postfix"
+POSTMAP = "/usr/sbin/postmap"
+SYSTEMCTL = "/usr/bin/systemctl"
+UNIT = "postfix.service"
+
+# Fixed PATH for every subprocess this script launches, regardless of
+# whatever PATH it inherited from sudo/the calling environment. Every
+# command below is already invoked by absolute path, so this is
+# defense in depth, not a functional requirement.
+SUBPROCESS_ENV = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin"}
+
+# Real map files for this app live under /etc/postfix/ip-management/
+# (see PostfixService.MAP_DIRECTORY), never directly under /etc/postfix.
+# The app layer (PostfixService.is_configured_map()) already restricts
+# postmap to maps Postfix actually references; this check is the
+# second, independent layer enforced at the privilege boundary itself -
+# it intentionally does not trust the caller's own validation.
+MAP_DIRECTORY = Path("/etc/postfix/ip-management").resolve()
+BACKUP_DIRECTORY = Path("/etc/postfix/backup").resolve()
+
+SIMPLE_ACTIONS = {
+    "check": [POSTFIX, "check"],
+    "reload": [SYSTEMCTL, "reload", UNIT],
+    "start": [SYSTEMCTL, "start", UNIT],
+    "stop": [SYSTEMCTL, "stop", UNIT],
+    "restart": [SYSTEMCTL, "restart", UNIT],
+    "enable": [SYSTEMCTL, "enable", UNIT],
+    "disable": [SYSTEMCTL, "disable", UNIT],
+}
+
+
+def log(message: str) -> None:
+    syslog.openlog("smtp-admin-postfix-helper", syslog.LOG_PID, syslog.LOG_AUTHPRIV)
+    syslog.syslog(syslog.LOG_NOTICE, message)
+    syslog.closelog()
+
+
+def valid_map(raw_path: str) -> Optional[Path]:
+    """
+    Returns the resolved path if it is a real, regular file under
+    /etc/postfix/ip-management (and not under its backup subdirectory),
+    otherwise None. No filename allowlist - PostfixService already
+    restricts postmap to maps actively referenced by Postfix's own
+    configuration; duplicating a fixed filename list here would just
+    be a second place to forget to update when a new map is added.
+    """
+    try:
+        resolved = Path(raw_path).resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+
+    if MAP_DIRECTORY not in resolved.parents:
+        return None
+
+    if resolved == MAP_DIRECTORY:
+        return None
+
+    if resolved == BACKUP_DIRECTORY or BACKUP_DIRECTORY in resolved.parents:
+        return None
+
+    if not resolved.is_file():
+        return None
+
+    return resolved
+
+
+def run(args: list[str]) -> int:
+    result = subprocess.run(
+        args, capture_output=True, text=True, timeout=20, env=SUBPROCESS_ENV
+    )
+    sys.stdout.write(result.stdout)
+    sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def main() -> int:
+    if os.geteuid() != 0:
+        print("must run as root", file=sys.stderr)
+        return 2
+
+    if len(sys.argv) < 2:
+        print("usage: smtp-admin-postfix-helper <check|reload|postmap <path>|start|stop|restart|enable|disable>", file=sys.stderr)
+        return 2
+
+    action = sys.argv[1]
+    caller = os.environ.get("SUDO_USER", "unknown")
+
+    if action in SIMPLE_ACTIONS and len(sys.argv) == 2:
+        log(f"invoked by {caller}: {action}")
+        returncode = run(SIMPLE_ACTIONS[action])
+        log(f"invoked by {caller}: {action} finished with exit code {returncode}")
+        return returncode
+
+    if action == "postmap" and len(sys.argv) == 3:
+        raw_path = sys.argv[2]
+        resolved = valid_map(raw_path)
+
+        if resolved is None:
+            log(f"invoked by {caller}: postmap REJECTED invalid path '{raw_path}'")
+            print("invalid Postfix map path", file=sys.stderr)
+            return 2
+
+        log(f"invoked by {caller}: postmap {resolved}")
+        returncode = run([POSTMAP, str(resolved)])
+        log(f"invoked by {caller}: postmap {resolved} finished with exit code {returncode}")
+        return returncode
+
+    log(f"invoked by {caller}: REJECTED unsupported invocation: {sys.argv[1:]}")
+    print("unsupported action", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
