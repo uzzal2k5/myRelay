@@ -832,6 +832,34 @@ class RecipientDomainService:
         )
 
     # ------------------------------------------------------------------
+    # Public policy application API (used by recipient_domains routes)
+    # ------------------------------------------------------------------
+
+    def apply_policy(
+        self,
+        policy: str,
+        entries: List[Dict],
+    ) -> Dict:
+        """
+        Apply the submitted UI entries to the selected recipient policy.
+
+        This is the public method expected by routes.py. Normal policies
+        (allowed/rejected) use _apply_normal_policy; restricted recipients
+        use _apply_restricted_policy so local-part rules are maintained.
+        """
+        self.validate_policy(policy)
+
+        if not isinstance(entries, list):
+            raise ValueError("Policy entries must be provided as a list.")
+
+        file_path = self.POLICIES[policy]["file"]
+
+        if policy == "restricted":
+            return self._apply_restricted_policy(file_path, entries)
+
+        return self._apply_normal_policy(policy, entries)
+
+    # ------------------------------------------------------------------
     # Atomic file write
     # ------------------------------------------------------------------
 

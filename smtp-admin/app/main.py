@@ -30,10 +30,7 @@ from .installation.routes import router as installation_router
 from .postfix.control_routes import router as postfix_control_router
 from .backups.routes import router as backups_router
 from app.monitoring.information_routes import router as information_router
-
-
-
-
+from app.delivery.routes import router as delivery_router
 
 
 
@@ -72,6 +69,7 @@ app.include_router(installation_router)
 app.include_router(postfix_control_router)
 app.include_router(backups_router)
 app.include_router(information_router)
+app.include_router(delivery_router)
 
 
 @app.middleware("http")

@@ -15,7 +15,7 @@
     <div class="policy-content">
         <div class="policy-description">{{ policy.description }}</div>
 
-        <form method="post" action="/recipient/domains/{{ policy_name }}">
+        <form method="post" action="/postfix/recipient/domains/{{ policy_name }}">
 
             <div id="{{ policy_name }}-entries">
                 {% if policy.entries %}
