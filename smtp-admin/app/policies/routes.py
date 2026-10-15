@@ -115,22 +115,60 @@ async def view_submission_config(request: Request):
             return render(request, "config.html", config="", error=str(exc))
 
 
+# @router.get("/submission/format", response_class=HTMLResponse)
+# async def view_submission_config(request: Request):
+#     guard = require_role(request, "security_admin", "smtp_admin", "read_only")
+#     if guard: return guard
+#     logger.info("GET /submission/format")
+#     #formatted_config = format_submission_restrictions(config)
+#     service = get_service()
+#     try:
+#         config = service.format_submission_restrictions()
+#         #return render(request, "submission-config.html", config=config)
+#         return templates.TemplateResponse(
+#                 "config.html",
+#                 {
+#                     "request": request,
+#                     "submission_config": submission_config,
+#                 },
+#             )
+#     except Exception as exc:
+#             return render(request, "submission-config.html", config="", error=str(exc))
+
 @router.get("/submission/format", response_class=HTMLResponse)
 async def view_submission_config(request: Request):
     guard = require_role(request, "security_admin", "smtp_admin", "read_only")
-    if guard: return guard
+    if guard:
+        return guard
+
     logger.info("GET /submission/format")
-    #formatted_config = format_submission_restrictions(config)
+
     service = get_service()
+
     try:
-        config = service.format_submission_restrictions()
-        #return render(request, "submission-config.html", config=config)
-        return templates.TemplateResponse(
-                "config.html",
-                {
-                    "request": request,
-                    "submission_config": submission_config,
-                },
-            )
-    except Exception as exc:
-            return render(request, "submission-config.html", config="", error=str(exc))
+        submission_config = service.format_submission_restrictions()
+
+        return render(
+            request,
+            "submission_config.html",
+            submission_config=submission_config,
+            config=submission_config,
+            error=None,
+        )
+
+    except Exception:
+        logger.exception("Failed to load submission configuration")
+
+        return render(
+            request,
+            "submission_config.html",
+            submission_config={
+                "client_access": {
+                    "allowed": {"count": 0},
+                    "restricted": {"count": 0},
+                }
+            },
+            config="",
+            error="Failed to load submission configuration.",
+        )
+

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/delivery.css">
+
+{% set s = report.summary %}
+
+<div class="dl-header">
+    <div>
+        <h2>Email Delivery Status</h2>
+        <p class="dl-subtitle">What happened to the mail this relay accepted: delivered, delayed, or bounced, and why.</p>
+    </div>
+</div>
+
+<p class="dl-period">
+    {% if report.period_start %}
+    Activity from <strong>{{ report.period_start }}</strong> to <strong>{{ report.period_end }}</strong>
+    ({{ report.record_count }} message{{ "s" if report.record_count != 1 }} in the last {{ "{:,}".format(lines) }} mail log lines).
+    {% elif not error %}
+    No mail activity found in the last {{ "{:,}".format(lines) }} mail log lines.
+    {% endif %}
+</p>
+
+{% if error %}
+<div class="dl-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="dl-summary-grid">
+    <div class="dl-tile">
+        <div class="dl-tile-icon is-sent"><i class="bi bi-check-circle-fill"></i></div>
+        <div>
+            <div class="dl-tile-label">Delivered</div>
+            <div class="dl-tile-value">{{ s.sent }}</div>
+        </div>
+    </div>
+
+    <div class="dl-tile">
+        <div class="dl-tile-icon is-deferred"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+            <div class="dl-tile-label">Deferred</div>
+            <div class="dl-tile-value">{{ s.deferred }}</div>
+            <div class="dl-tile-hint">Still retrying</div>
+        </div>
+    </div>
+
+    <div class="dl-tile">
+        <div class="dl-tile-icon is-bounced"><i class="bi bi-x-circle-fill"></i></div>
+        <div>
+            <div class="dl-tile-label">Bounced</div>
+            <div class="dl-tile-value">{{ s.bounced }}</div>
+            <div class="dl-tile-hint">Permanently failed</div>
+        </div>
+    </div>
+
+    <div class="dl-tile">
+        <div class="dl-tile-icon is-rejected"><i class="bi bi-shield-x"></i></div>
+        <div>
+            <div class="dl-tile-label">Rejected</div>
+            <div class="dl-tile-value">{{ s.rejected }}</div>
+            <div class="dl-tile-hint">Refused at submission</div>
+        </div>
+    </div>
+
+    <div class="dl-tile">
+        <div class="dl-tile-icon"><i class="bi bi-percent"></i></div>
+        <div>
+            <div class="dl-tile-label">Success rate</div>
+            <div class="dl-tile-value">{{ (s.success_rate ~ "%") if s.success_rate is not none else "—" }}</div>
+            <div class="dl-tile-hint">Delivered / (delivered + bounced)</div>
+        </div>
+    </div>
+
+    <div class="dl-tile">
+        <div class="dl-tile-icon"><i class="bi bi-stopwatch"></i></div>
+        <div>
+            <div class="dl-tile-label">Avg delivery time</div>
+            <div class="dl-tile-value">{{ (s.avg_delay ~ "s") if s.avg_delay is not none else "—" }}</div>
+            {% if s.in_progress %}<div class="dl-tile-hint">{{ s.in_progress }} still in progress</div>{% endif %}
+        </div>
+    </div>
+</div>
+
+{% if report.top_issues %}
+<div class="dl-panel">
+    <div class="dl-panel-header">
+        <i class="bi bi-exclamation-diamond"></i>
+        Top problems
+        <span class="dl-panel-note">Similar failures are grouped, with addresses and IPs removed</span>
+    </div>
+    <div class="dl-table-wrapper">
+        <table class="dl-table">
+            <thead>
+            <tr>
+                <th>Status</th>
+                <th>Reason</th>
+                <th class="dl-num">Count</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for issue in report.top_issues %}
+            <tr>
+                <td><span class="dl-badge is-{{ issue.status }}">{{ issue.status }}</span></td>
+                <td class="dl-reason">
+                    {% if issue.dsn %}<span class="dl-mono">{{ issue.dsn }}</span> {% endif %}{{ issue.reason }}
+                    <div class="dl-reason-meta">
+                        {% if issue.domains %}Mostly to {{ issue.domains | join(", ") }}. {% endif %}Last seen {{ issue.last_seen or "—" }}
+                    </div>
+                </td>
+                <td class="dl-num"><strong>{{ issue.count }}</strong></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="dl-two-col">
+    <div class="dl-panel">
+        <div class="dl-panel-header"><i class="bi bi-globe2"></i>By destination domain</div>
+        {% if report.top_domains %}
+        <div class="dl-table-wrapper">
+            <table class="dl-table">
+                <thead>
+                <tr><th>Domain</th><th>Outcome</th><th class="dl-num">Total</th></tr>
+                </thead>
+                <tbody>
+                {% for d in report.top_domains %}
+                <tr>
+                    <td class="dl-mono">{{ d.domain }}</td>
+                    <td>
+                        <div class="dl-bar" title="{{ d.sent }} delivered, {{ d.deferred }} deferred, {{ d.bounced }} bounced, {{ d.rejected }} rejected">
+                            <span class="is-sent" style="width: {{ (d.sent / d.total * 100) | round(1) }}%"></span>
+                            <span class="is-deferred" style="width: {{ (d.deferred / d.total * 100) | round(1) }}%"></span>
+                            <span class="is-bounced" style="width: {{ (d.bounced / d.total * 100) | round(1) }}%"></span>
+                            <span class="is-rejected" style="width: {{ (d.rejected / d.total * 100) | round(1) }}%"></span>
+                        </div>
+                    </td>
+                    <td class="dl-num">{{ d.total }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="dl-empty">No deliveries in this window.</div>
+        {% endif %}
+    </div>
+
+    <div class="dl-panel">
+        <div class="dl-panel-header"><i class="bi bi-person-lines-fill"></i>By sending account</div>
+        {% if report.top_senders %}
+        <div class="dl-table-wrapper">
+            <table class="dl-table">
+                <thead>
+                <tr><th>Account</th><th class="dl-num">Delivered</th><th class="dl-num">Deferred</th><th class="dl-num">Bounced</th></tr>
+                </thead>
+                <tbody>
+                {% for sender in report.top_senders %}
+                <tr>
+                    <td class="dl-mono">{{ sender.sender }}</td>
+                    <td class="dl-num">{{ sender.sent }}</td>
+                    <td class="dl-num">{{ sender.deferred }}</td>
+                    <td class="dl-num">{{ sender.bounced }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="dl-empty">No accepted mail in this window.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="dl-controls">
+    <div class="dl-tabs" role="tablist" aria-label="Filter by delivery status">
+        {% for key, label in [("all", "All"), ("sent", "Delivered"), ("deferred", "Deferred"), ("bounced", "Bounced"), ("rejected", "Rejected")] %}
+        <a class="dl-tab {{ 'is-active' if status == key }}"
+           href="/delivery?status={{ key }}&q={{ search_query | urlencode }}&lines={{ lines }}"
+           role="tab" aria-selected="{{ 'true' if status == key else 'false' }}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <form method="get" action="/delivery" class="dl-search-form">
+        <input type="hidden" name="status" value="{{ status }}">
+        <div class="dl-search">
+            <i class="bi bi-search"></i>
+            <input type="text" name="q" value="{{ search_query }}" maxlength="200"
+                   placeholder="Filter by recipient, sender, domain, queue ID, or error text..."
+                   aria-label="Filter delivery events">
+        </div>
+        <select name="lines" class="dl-select" aria-label="How much of the mail log to read">
+            {% for choice in window_choices %}
+            <option value="{{ choice }}" {{ 'selected' if choice == lines }}>Last {{ "{:,}".format(choice) }} log lines</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="dl-go">Apply</button>
+    </form>
+</div>
+
+<div class="dl-panel">
+    <div class="dl-panel-header">
+        <i class="bi bi-list-ul"></i>
+        Delivery events
+        <span class="dl-panel-note">{{ report.events_total }} match{{ "es" if report.events_total != 1 else "" }}</span>
+    </div>
+
+    {% if report.events %}
+    <div class="dl-table-wrapper">
+        <table class="dl-table">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Recipient</th>
+                <th>From</th>
+                <th class="dl-num">Delay</th>
+                <th>Detail</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for e in report.events %}
+            <tr>
+                <td class="dl-mono dl-muted">{{ e.time or "—" }}</td>
+                <td><span class="dl-badge is-{{ e.status }}">{{ e.status }}</span></td>
+                <td class="dl-mono">{{ e.recipient }}</td>
+                <td class="dl-mono">{{ e.sasl_username or e.sender or "—" }}</td>
+                <td class="dl-num">{{ (e.delay ~ "s") if e.delay is not none else "—" }}</td>
+                <td>
+                    {% if e.detail %}
+                    <details class="dl-details">
+                        <summary>{% if e.dsn %}{{ e.dsn }} · {% endif %}View</summary>
+                        <pre>{{ e.detail }}{% if e.relay %}
+
+relay: {{ e.relay }}{% endif %}
+queue ID: {{ e.queue_id }}</pre>
+                    </details>
+                    {% else %}
+                    <span class="dl-muted dl-mono">{{ e.queue_id }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if report.events_truncated %}
+    <div class="dl-truncated">
+        Showing the newest {{ report.events | length }} of {{ report.events_total }} matching events.
+        Narrow the filter to see the rest.
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="dl-empty">
+        {% if error %}Delivery events are unavailable until the mail log can be read.
+        {% elif search_query or status != "all" %}No events match this filter.
+        {% else %}No delivery events in this window.{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
